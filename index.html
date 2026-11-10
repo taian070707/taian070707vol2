@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>やさしい投資ナビAI - 第2弾</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#fbfaf6;color:#292524;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;-webkit-tap-highlight-color:transparent;padding-bottom:84px}
+.card{background:#ffffff;border:1px solid #ece8df;box-shadow:0 6px 18px -4px rgba(41,37,36,.05)}
+.yf-head{background:linear-gradient(180deg,#1e293b,#334155);color:#fff}
+.gauge{background:linear-gradient(90deg,#10b981 0%,#38bdf8 35%,#fbbf24 70%,#f43f5e 100%)}
+.sc::-webkit-scrollbar{width:4px;height:4px}.sc::-webkit-scrollbar-thumb{background:#d6d3d1;border-radius:99px}
+.hidden{display:none!important}
+@keyframes sp{to{transform:rotate(360deg)}}.spin{display:inline-block;animation:sp .8s linear infinite}
+</style>
+</head>
+<body class="max-w-md mx-auto min-h-screen px-3.5 pt-3">
+
+<!-- 1. ヘッダー -->
+<header class="flex justify-between items-center mb-3">
+  <div>
+    <div class="flex items-center gap-1.5 mb-0.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span id="syncTxt" class="text-[10px] font-bold text-emerald-700">統計AIが市場データをやさしく翻訳中</span>
+    </div>
+    <h1 class="text-lg font-extrabold text-stone-800 tracking-tight">やさしい投資ナビ <span class="text-[11px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">第2弾</span></h1>
+  </div>
+  <div class="flex gap-1.5">
+    <button type="button" onclick="syncAll()" class="text-[11px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 px-2.5 py-2 rounded-2xl shadow-sm flex items-center gap-1"><span id="syncIco">🔄</span>最新にする</button>
+    <button type="button" onclick="modal('catModal',1)" class="text-[11px] font-bold text-stone-700 bg-white border border-stone-200 px-2.5 py-2 rounded-2xl">📖 図鑑</button>
+  </div>
+</header>
+
+<!-- 2. 検索バー（株・投資信託・4桁/8桁コード完全対応） -->
+<section class="mb-3.5">
+  <div class="card rounded-3xl p-3 border-2 border-emerald-500/30">
+    <div class="flex items-center gap-1.5">
+      <span class="text-base">🔍</span>
+      <input type="search" id="qIn" placeholder="気になる会社名・投資信託・コードを入力..." autocomplete="off" class="w-full text-xs font-bold bg-stone-50 border border-stone-200 rounded-2xl px-3 py-2 focus:outline-none">
+      <button type="button" id="clrBtn" onclick="clrSearch()" class="hidden text-stone-400 px-2 py-1.5 text-xs font-bold bg-stone-100 rounded-xl">✕</button>
+      <button type="button" onclick="directSearch()" class="bg-emerald-600 text-white text-xs font-extrabold px-3 py-2 rounded-2xl shrink-0">探す</button>
+    </div>
+    <div class="flex items-center gap-1.5 mt-2 pt-2 border-t border-stone-100 overflow-x-auto sc pb-1">
+      <span class="text-[10px] font-bold text-stone-400 shrink-0">人気の検索:</span>
+      <button type="button" onclick="qSet('日経225')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-xl border border-emerald-200 shrink-0">🌱 日経225投信</button>
+      <button type="button" onclick="qSet('netWIN')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-xl border border-emerald-200 shrink-0">🌱 netWIN</button>
+      <button type="button" onclick="qSet('千葉')" class="text-[10px] font-bold bg-amber-50 text-amber-900 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0">🏦 千葉銀行</button>
+      <button type="button" onclick="qSet('りそな')" class="text-[10px] font-bold bg-amber-50 text-amber-900 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0">🏦 りそなHD</button>
+      <button type="button" onclick="qSet('北浜')" class="text-[10px] font-bold bg-sky-50 text-sky-800 px-2.5 py-1 rounded-xl border border-sky-200 shrink-0">📈 北浜キャピタル</button>
+      <button type="button" onclick="qSet('キオクシア')" class="text-[10px] font-bold bg-purple-50 text-purple-800 px-2.5 py-1 rounded-xl border border-purple-200 shrink-0">💎 キオクシア</button>
+    </div>
+    <div id="sPanel" class="hidden mt-2.5 pt-2 border-t border-emerald-100">
+      <div class="flex justify-between items-center mb-1.5 px-1">
+        <span class="text-[11px] font-extrabold text-emerald-800">見つかった候補（タップで追加・診断）</span>
+        <button type="button" onclick="clrSearch()" class="text-[10px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-lg">▲ 閉じる</button>
+      </div>
+      <div id="sList" class="max-h-60 overflow-y-auto divide-y divide-stone-100 border border-stone-200 rounded-2xl bg-white sc"></div>
+      <div id="sMsg" class="hidden mt-1.5 px-2.5 py-1 bg-emerald-50 rounded-xl text-[10px] font-bold text-emerald-800"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 失敗しない「3つの袋」予算シミュレーター -->
+<section class="card rounded-3xl p-4 mb-3.5 bg-gradient-to-br from-white to-amber-50/40">
+  <div class="flex justify-between items-center mb-1.5">
+    <h2 class="text-xs font-extrabold text-stone-700">👛 失敗しない「3つの袋」予算わけ</h2>
+    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">一度に全部買わない安心設計</span>
+  </div>
+  <p class="text-[11px] text-stone-500 mb-2.5 leading-relaxed">お金を3つの袋に分けておくと、買ったあとに値下がりしても「安く買い足せるチャンス」に変わります。</p>
+  <div class="grid grid-cols-2 gap-2 mb-2.5">
+    <div class="bg-stone-50 p-2 rounded-2xl border border-stone-200/80">
+      <label class="text-[10px] font-bold text-stone-500 block">使えるご予算 (円)</label>
+      <input type="number" id="bIn" value="300000" step="10000" class="w-full bg-white border border-stone-200 rounded-xl px-2 py-1 text-xs font-extrabold" oninput="renderAll()">
+    </div>
+    <div class="bg-stone-50 p-2 rounded-2xl border border-stone-200/80">
+      <label class="text-[10px] font-bold text-stone-500 block">いまの世の中の空気</label>
+      <select id="mSel" class="w-full bg-white border border-stone-200 rounded-xl px-1.5 py-1 text-xs font-bold" onchange="renderAll()">
+        <option value="rate_hike">🏦 金利が上がる時期（銀行に追い風）</option>
+        <option value="normal">☀️ ふつうの穏やかな時期</option>
+        <option value="shock">☔ 市場全体が急に下がった時期</option>
+        <option value="overheat">🔥 みんなが買い急いでいる時期</option>
+      </select>
+    </div>
+  </div>
+  <div id="allocBox" class="grid grid-cols-3 gap-2 text-center"></div>
+</section>
+
+<!-- 4. フィルター & 並び替え -->
+<div class="flex items-center justify-between gap-2 mb-2.5">
+  <div class="flex gap-1 overflow-x-auto sc">
+    <button type="button" onclick="setFlt('ALL')" id="f-ALL" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-emerald-600 text-white">すべて</button>
+    <button type="button" onclick="setFlt('STOCK')" id="f-STOCK" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-white border text-stone-600">🏢 会社の株</button>
+    <button type="button" onclick="setFlt('FUND')" id="f-FUND" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-white border text-stone-600">🌱 投資信託</button>
+    <button type="button" onclick="setFlt('REIT')" id="f-REIT" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-white border text-stone-600">🏙️ 不動産</button>
+  </div>
+  <select id="sSel" onchange="renderList()" class="text-[11px] font-bold bg-white border rounded-2xl px-2.5 py-1.5 text-stone-700">
+    <option value="def">追加した順</option>
+    <option value="score">おすすめ順</option>
+    <option value="rsi">お買い得順</option>
+  </select>
+</div>
+
+<!-- 5. 監視リスト -->
+<section>
+  <div class="flex justify-between items-center mb-2 px-1">
+    <span class="text-[11px] font-bold text-stone-500">💡 カードをタップすると「チャートとやさしい理由」を表示</span>
+    <span id="cntLbl" class="text-[11px] font-extrabold text-emerald-700"></span>
+  </div>
+  <div id="wBox" class="space-y-3"></div>
+  <div class="mt-5 flex justify-center gap-4">
+    <button type="button" onclick="modal('custModal',1)" class="text-[11px] font-bold text-emerald-700 underline">＋ コード指定・手動で追加</button>
+    <button type="button" onclick="resetAll()" class="text-[11px] text-stone-400 underline">最初のリストに戻す</button>
+  </div>
+</section>
+
+<!-- 詳細モーダル（最上部：株価・PTS・チャート ＋ 中段：数字を使わないやさしい解説 ＋ 下段：統計根拠データ） -->
+<div id="dtModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center">
+  <div class="bg-[#fbfaf6] w-full max-w-md rounded-t-3xl sm:rounded-3xl border shadow-2xl max-h-[94vh] flex flex-col overflow-hidden">
+    <div class="bg-[#1e293b] text-white px-4 py-3 flex justify-between items-center shrink-0">
+      <div class="min-w-0 pr-2">
+        <div class="flex items-center gap-1.5"><span id="mBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md"></span><span id="mCode" class="text-[11px] font-bold text-slate-300"></span></div>
+        <h3 id="mTitle" class="text-sm font-extrabold text-white mt-0.5 truncate"></h3>
+      </div>
+      <button type="button" onclick="modal('dtModal',0)" class="w-8 h-8 rounded-full bg-slate-700 text-white font-bold">✕</button>
+    </div>
+    <div id="mBody" class="p-3.5 overflow-y-auto space-y-3.5 sc"></div>
+    <div class="bg-white px-4 py-2.5 border-t flex gap-2 shrink-0">
+      <button type="button" id="mDel" class="px-3 py-2 rounded-2xl border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold">🗑️ 外す</button>
+      <button type="button" id="mSync" class="px-3 py-2 rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-extrabold">🔄 最新価格を再取得</button>
+      <button type="button" onclick="modal('dtModal',0)" class="flex-1 py-2 rounded-2xl bg-emerald-600 text-white text-xs font-extrabold">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 図鑑モーダル -->
+<div id="catModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center">
+  <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border shadow-2xl max-h-[88vh] flex flex-col overflow-hidden">
+    <div class="px-4 py-3 border-b flex justify-between items-center">
+      <h3 class="text-sm font-extrabold">📖 人気の株・投資信託 図鑑</h3>
+      <button type="button" onclick="modal('catModal',0)" class="w-7 h-7 rounded-full bg-stone-100 font-bold">✕</button>
+    </div>
+    <div class="p-2.5 bg-stone-50 border-b">
+      <input type="search" id="catIn" placeholder="図鑑内を検索（例: 日経225, netWIN, 千葉, 銀行）" class="w-full bg-white border rounded-2xl px-3 py-1.5 text-xs font-bold" oninput="renderCat()">
+    </div>
+    <div id="catList" class="p-3 overflow-y-auto divide-y flex-1 sc"></div>
+  </div>
+</div>
+
+<!-- コード・手動追加モーダル -->
+<div id="custModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-5 border shadow-2xl space-y-3">
+    <div class="flex justify-between items-center">
+      <h3 class="text-sm font-extrabold">📝 コード指定・手動追加</h3>
+      <button type="button" onclick="modal('custModal',0)" class="w-7 h-7 rounded-full bg-stone-100 font-bold">✕</button>
+    </div>
+    <p class="text-[11px] text-stone-500">株の4桁コード(例: <code>8331</code>)や投資信託の8桁コード(例: <code>47311988</code>, <code>AJ313178</code>)を入れると自動で価格とチャートを取得します。</p>
+    <div class="space-y-2 text-xs">
+      <input type="text" id="cCode" placeholder="コード（例: 47311988 / AJ313178 / 8331）" class="w-full bg-stone-50 border rounded-2xl px-3 py-2 font-bold">
+      <input type="text" id="cName" placeholder="名前（空欄でもコードから自動取得します）" class="w-full bg-stone-50 border rounded-2xl px-3 py-2 font-bold">
+      <div class="grid grid-cols-2 gap-2">
+        <select id="cType" class="bg-stone-50 border rounded-2xl px-2 py-2 font-bold">
+          <option value="FUND">🌱 投資信託</option>
+          <option value="STOCK">🏢 会社の株</option>
+          <option value="LEVERAGE">⚡ ブル型投信</option>
+          <option value="REIT">🏙️ 不動産(REIT)</option>
+        </select>
+        <input type="number" step="0.1" id="cPrice" placeholder="現在価格(空欄で自動)" class="bg-stone-50 border rounded-2xl px-3 py-2 font-bold">
+      </div>
+    </div>
+    <div class="flex gap-2 pt-1">
+      <button type="button" onclick="modal('custModal',0)" class="flex-1 py-2 rounded-2xl bg-stone-100 text-xs font-bold">キャンセル</button>
+      <button type="button" onclick="submitCust()" class="flex-1 py-2 rounded-2xl bg-emerald-600 text-white text-xs font-extrabold">取得して追加</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 1. マスターデータ（説明文は数字を減らし、初心者にも事業の強みが直感的に伝わる表現に刷新）
+const RAW = `47311988|日経２２５ノーロードオープン|FUND|国内の代表的な会社パック|44529|45120|46|-0.5|+2.32% (+1,011円)||1321.T|にっけい 日経225 ノーロード|日本を代表する大企業225社にまとめて投資できる定番の投資信託です。購入手数料が無料で、日本経済全体の成長にコツコツ乗りたい方にぴったりです。
+AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コストな日本株パック|35159|35620|46|-0.5|+2.33% (+802円)||1321.T|すまーとあい smart-i スマートi 日経225 りそな|りそなグループが運用する、保有コスト（手数料）がとても安い日経平均連動タイプの投資信託です。長くじっくり積み立てるのに向いています。
+3531299B|netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)|FUND|米国の最新IT・AI企業パック|48494|46800|58|0.8|+2.08% (+987円)||2244.T|netwin ねっとうぃん ネットウィン GS テクノロジー|世界をリードするアメリカのIT・AI企業（エヌビディアやマイクロソフトなど）をプロが厳選して運用する大人気ファンドです。
+3531199B|netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)|FUND|米国IT企業パック(円高対策つき)|26850|26100|56|0.6|+1.94% (+510円)||2244.T|netwin ねっとうぃん ネットウィン Aコース|netWINの「為替の変動リスクを抑えたコース」です。将来もし円高になっても影響を受けにくい設計になっています。
+0331418A|eMAXIS Slim 全世界株式 (オール・カントリー)|FUND|世界中の企業まるごとパック|29694|30850|45|-0.8|+0.32%||2559.T|おるかん オルカン 全世界 emaxis|日本で一番多くの人に買われている「オルカン」です。これ1つで世界中の優良企業に分散投資でき、手数料も極めて安い王道ファンドです。
+03311187|eMAXIS Slim 米国株式 (S&P500)|FUND|米国の優良500社パック|42755|43900|44|-0.9|-4.62%||2558.T|べいこく 米国 S&P500 SP500 emaxis|アメリカの代表的な大企業500社にまとめて投資する人気ファンドです。長期的な成長力が魅力です。
+03311182|eMAXIS Slim 国内株式 (日経平均)|FUND|低コストな日経平均パック|39120|39600|46|-0.5|+2.30%||1321.T|にっけい 日経平均 日経225 emaxis|トップクラスに安い手数料で、日本の日経平均株価と同じ値動きを目指すインデックス投信です。
+2931113C|ニッセイ日経２２５インデックスファンド|FUND|国内の代表的な会社パック|41280|41800|46|-0.5|+2.31%||1321.T|にっせい ニッセイ 日経225|長年の安定した運用実績がある、日本の代表的な225社に投資するファンドです。
+4731115C|たわらノーロード 日経２２５|FUND|低コストな日経平均パック|38450|38900|46|-0.5|+2.32%||1321.T|たわら 日経225|手数料が安く、新NISAでのつみたて投資でも人気の高い日本株インデックスファンドです。
+18312991|インベスコ 世界厳選株式オープン(毎月決算型)【世界のベスト】|FUND|世界の優良株(毎月お小遣い型)|8596|8680|48|-0.3|+0.66%||2559.T|いんべすこ インベスコ 世界のベスト|『世界のベスト』の愛称で親しまれ、配当や成長力が魅力的な世界の企業に投資し、毎月分配金を出す仕組みのファンドです。
+39312149|アライアンス・バーンスタイン・米国成長株投信 Dコース|FUND|米国成長株(毎月お小遣い型)|11240|11350|49|-0.2|+1.08%||2558.T|あらいあんす AB 米国成長株 Dコース|アメリカの成長企業に投資しながら、成績に応じて毎月分配金を受け取れる大人気のファンドです。
+04311181|iFreeNEXT FANG+インデックス|FUND|米国トップIT10社集中パック|64200|61800|61|1.1|+1.45%||2244.T|ふぁんぐ FANG FANG+ ifree|アメリカの超巨大IT企業10社だけに集中して投資するファンドです。値動きは大きめですが高い成長が期待されています。
+01312098|野村世界業種別投資シリーズ(世界半導体株投資)|FUND|世界の半導体メーカー集中パック|162400|165000|46|-0.4|+1.63%||2244.T|のむら 野村 世界半導体|AIやスマホに欠かせない「世界のトップ半導体メーカー」に絞って投資する人気の成長ファンドです。
+9I311249|楽天・高配当株式・米国ファンド【楽天SCHD】|FUND|米国の高配当カンパニーパック|10840|10650|54|0.4|+0.35%||2558.T|らくてん 楽天 SCHD 高配当|長年ずっと配当金を出し続けているアメリカの堅実な優良企業100社に投資するファンドです。
+9I31115A|楽天日本株4.3倍ブル|LEVERAGE|値動き4.3倍の超短期向け投信|54773|76500|38|-1.4|+11.90%||1570.T|らくてん 楽天 4.3倍 ブル レバレッジ|日経平均の約4.3倍のスピードで激しく上下する上級者向け商品です。長く持ち続けると目減りしやすいため、短期間の反発狙い専用です。
+8331|千葉銀行|STOCK|銀行・地域トップクラスの地方銀行|2498.5|2515|51|-0.1|+5.11%|2630:+131.5 (+5.26%)||ちば 千葉 ちばぎん 地銀 地方銀行|千葉県を中心に首都圏で強い基盤を持つ大手地方銀行です。世の中の金利が上がると「貸出の利益」が増えやすく、株主への還元にも積極的です。
+8308|りそなホールディングス|STOCK|銀行・個人と中小企業に強い大手行|2191.5|2265|46|-0.6|+1.30% (PTS)|2220:+28.5 (+1.30%)||りそな りそな銀行 メガバンク|個人や中小企業との取引、さらに不動産や信託業務に強みを持つ大手銀行グループです。日本の金利が上がる局面では本業の利益が伸びやすい特徴があります。
+8306|三菱UFJフィナンシャル・グループ|STOCK|銀行・日本最大のメガバンク|3366|3380|52|-0.1|+4.40%|3415:+49 (+1.46%)||みつびしUFJ 三菱UFJ メガバンク|日本最大の金融グループです。国内外で幅広く稼ぐ力があり、配当金を増やしたり自社の株を買い戻すなど、株主を大切にする姿勢が強い王道銘柄です。
+8316|三井住友フィナンシャルグループ|STOCK|銀行・高配当で人気のメガバンク|3126|3140|51|-0.1|+3.92%|3158:+32 (+1.02%)||みついすみとも 三井住友 メガバンク|効率の良い経営と「配当金を減らさず維持・増やしていく方針」で、個人投資家からとても人気が高いメガバンクです。
+8411|みずほフィナンシャルグループ|STOCK|銀行・大企業に強いメガバンク|3810|3760|54|0.4|+1.87%|3845:+35 (+0.92%)||みずほ メガバンク|日本の多くの大企業と深い取引を持つ3大メガバンクの一角です。安定した配当利回りが魅力です。
+8354|ふくおかフィナンシャルグループ|STOCK|銀行・九州トップの地方銀行|6676|6780|48|-0.3|+3.79%|6710:+34 (+0.51%)||ふくおか 福岡 福岡銀行 地銀|半導体工場の進出などで経済が盛り上がっている九州エリアを引っ張る、国内最大級の地方銀行グループです。
+7186|コンコルディア・FG (横浜銀行)|STOCK|銀行・首都圏の有力地方銀行|1582.5|1610|47|-0.4|+2.69%|||よこはま 横浜 横浜銀行 コンコルディア 地銀|横浜銀行と東日本銀行が一緒になった、首都圏で最大の地方銀行グループです。
+5831|しずおかFG (静岡銀行)|STOCK|銀行・財務が健全な地方銀行|1845|1860|49|-0.2|+1.93%|||しずおか 静岡 静岡銀行 地銀|昔から経営の健全さと安定感でトップクラスの評価を得ている静岡銀行グループです。
+7167|めぶきフィナンシャルグループ|STOCK|銀行・北関東の地方銀行|925|935|48|-0.3|+1.87%|||めぶき 常陽 足利 茨城 栃木 地銀|茨城の常陽銀行と栃木の足利銀行がタッグを組んだ、北関東最大の銀行グループです。
+8334|群馬銀行|STOCK|銀行・株主還元に熱心な地銀|1285|1295|49|-0.2|+2.80%|||ぐんま 群馬 群馬銀行 地銀|群馬県トップの地方銀行で、配当などの株主還元に力を入れています。
+5838|楽天銀行|STOCK|銀行・急成長するネット銀行最大手|4980|4820|58|0.7|+2.68%|||らくてんぎんこう 楽天銀行|店舗を持たないネット銀行の最大手です。金利が上がるとその恩恵を素早く受けられる成長企業です。
+2134|北浜キャピタルパートナーズ|STOCK|金融・少額で買える低位株|17|14.2|68|1.8|+41.67%|17.1:+0.1 (+0.59%)||きたはま 北浜 北浜キャピタル 低位株|1株あたり数十円という少額で売買されている銘柄です。わずか1円動くだけで損益が大きく変わるため、欲張らず余裕資金だけで小さく試すのが鉄則です。
+285A|キオクシアホールディングス|STOCK|半導体・データ保存メモリの世界大手|8621|10450|34|-1.6|+1.29%|8690:+69 (+0.80%)||きおくしあ キオクシア 半導体 メモリ|スマホやAIデータセンターで「データを記憶する部品（フラッシュメモリ）」を作る世界的なメーカーです。値動きの波が大きいため、大きく下がった時を狙うのがコツです。
+6976|太陽誘電|STOCK|電子部品・スマホやAI向けの重要部品|6651|7480|36|-1.5|-0.34%|6999:+348 (+5.23%)||たいようゆうでん 太陽誘電 半導体 電子部品|スマホや電気自動車、AIサーバーの中に何百個も使われる小さな電子部品（コンデンサ）の世界大手です。
+6758|ソニーグループ|STOCK|電機・ゲームや音楽などエンタメの巨人|4297|4160|57|0.8|+3.74%|4250.1:-46.9 (-1.09%)||そにー ソニー ゲーム 半導体|プレイステーションのゲーム、音楽、映画、アニメに加えて、スマホのカメラ部品でも世界トップを走る日本を代表するグローバル企業です。
+5802|住友電気工業|STOCK|インフラ・AI時代を支える電線トップ|1435.5|1540|42|-1.1|+5.55%|1524.1:+88.6 (+6.17%)||すみともでんこう 住友電工 電線|自動車の配線部品で世界トップ級、さらにAIデータセンターを繋ぐ光ファイバーや電力ケーブルでも頼りにされるインフラ企業です。
+6501|日立製作所|STOCK|インフラ・世界の電力網とITを支える|4702|4850|45|-0.7|+3.52%|4835:+133 (+2.83%)||ひたち 日立 インフラ 電線|世界中の送電網（電気を届ける仕組み）と企業のIT化を支える、日本を代表する超優良グローバル企業です。
+7203|トヨタ自動車|STOCK|自動車・ハイブリッド車で世界ナンバーワン|3491|3410|53|0.4|+4.58%|3446:-45 (-1.29%)||とよた トヨタ 自動車|ハイブリッド車で世界中のライバルを圧倒する、日本最大のモノづくり企業です。
+8035|東京エレクトロン|STOCK|半導体・半導体をつくる装置の世界大手|22450|23500|39|-1.2|+1.58%|||とうきょうえれくとろん 東エレク 半導体|最先端の半導体チップを作るために欠かせない「製造マシン」で世界トップクラスのシェアを持つ高収益企業です。
+6857|アドバンテスト|STOCK|半導体・AIチップの検査マシン世界首位|8920|8650|59|0.8|+2.41%|||あどばんてすと アドバンテスト 半導体|AI向けの高性能な半導体が正しく動くかをチェックする「検査マシン」で世界ナンバーワンの企業です。
+5803|フジクラ|STOCK|電線・AIデータセンター向けで急成長|3260|3150|58|0.7|+2.
