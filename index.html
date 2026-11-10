@@ -6,326 +6,362 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="れい投資ナビ">
-    <title>れいちゃんのやさしい投資ナビ - 統計AIアドバイザー</title>
+    <title>れいちゃんの投資ナビ - しくみが学べる統計AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-warm: #fffaf7;
-        }
         body {
-            background: linear-gradient(180deg, #fff5f5 0%, #fffaf7 45%, #f4fbf9 100%);
+            background-color: #faf8f6;
             color: #334155;
             font-family: -apple-system, BlinkMacSystemFont, "Hiragino Maru Gothic ProN", "Hiragino Sans", "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
-            padding-bottom: env(safe-area-inset-bottom, 90px);
+            padding-bottom: env(safe-area-inset-bottom, 84px);
         }
-        .soft-card {
+        .clean-card {
             background: #ffffff;
-            border: 1.5px solid #fce7f3;
-            box-shadow: 0 6px 20px -4px rgba(244, 114, 182, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-            transition: transform 0.15s ease;
+            border: 1px solid #f1e9e4;
+            box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
-        .soft-card:active {
+        .clean-card:active {
             transform: scale(0.985);
         }
-        .header-grad {
-            background: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #c084fc 100%);
+        .soft-header {
+            background: linear-gradient(135deg, #fb7185 0%, #f472b6 100%);
             color: #ffffff;
         }
-        .gauge-gentle {
+        .gauge-bar {
             background: linear-gradient(90deg, #34d399 0%, #60a5fa 35%, #fbbf24 70%, #fb7185 100%);
         }
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 9999px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 9999px; }
         .hidden { display: none !important; }
         @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin-fast { display: inline-block; animation: spin-slow 0.8s linear infinite; }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen px-3.5 pt-3 pb-28">
+<body class="max-w-md mx-auto min-h-screen px-4 pt-3.5 pb-24">
 
-    <!-- 1. やさしいヘッダー -->
-    <header class="flex justify-between items-center mb-3.5">
+    <!-- 1. スッキリシンプルなヘッダー -->
+    <header class="flex justify-between items-center mb-4">
         <div>
             <div class="flex items-center gap-1.5 mb-0.5">
-                <span id="syncStatusDot" class="inline-block w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
-                <span id="syncStatusText" class="text-[10px] font-bold text-rose-500">統計AIが市場データをリアルタイム見守り中</span>
+                <span class="inline-block w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+                <span id="syncStatusText" class="text-[10px] font-bold text-slate-400">日経・Y!・みんかぶ・株探 連動中</span>
             </div>
-            <h1 class="text-lg font-extrabold text-slate-800 tracking-tight flex items-center gap-1.5">
-                <span>🌸 れいちゃんの投資ナビ</span>
-            </h1>
+            <h1 class="text-lg font-extrabold text-slate-800 tracking-tight">🌸 れいちゃんの投資ナビ</h1>
         </div>
         <div class="flex items-center gap-1.5">
-            <button type="button" id="syncAllBtn" onclick="syncAllWatchlistPrices(true)" class="text-[11px] font-extrabold text-white bg-rose-400 hover:bg-rose-500 px-3 py-2 rounded-2xl shadow-sm flex items-center gap-1">
-                <span id="syncBtnIcon">🔄</span> 最新にする
+            <button type="button" onclick="openLearnGuideModal()" class="text-[11px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-2 rounded-2xl">
+                🎓 しくみ講座
             </button>
-            <button type="button" onclick="openCatalogModal()" class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-2 rounded-2xl">
-                📖 図鑑
+            <button type="button" onclick="openCatalogModal()" class="text-[11px] font-extrabold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-2 rounded-2xl">
+                📖 商品図鑑
+            </button>
+            <button type="button" onclick="syncAllWatchlistPrices(true)" class="text-[11px] font-extrabold text-slate-600 bg-white border border-slate-200 px-2.5 py-2 rounded-2xl shadow-2xs">
+                <span id="syncBtnIcon">🔄</span>
             </button>
         </div>
     </header>
 
-    <!-- 2. かんたん検索セクション（おなじみの企業・投資信託・コードすべて対応） -->
+    <!-- 2. マルチ検索バー（日経・Yahoo!・みんかぶ・株探 横断検索） -->
     <section class="mb-4" id="searchSection">
-        <div class="soft-card rounded-3xl p-3 bg-white border-2 border-rose-200">
+        <div class="clean-card rounded-3xl p-3 bg-white border-2 border-rose-100">
             <div class="flex items-center gap-1.5">
                 <span class="text-base pl-1">🔍</span>
                 <input 
                     type="search" 
                     id="quickSearchInput" 
-                    placeholder="気になる会社や投信を検索（例：サンリオ、オルカン、千葉）" 
+                    placeholder="株・投信・金・債券・コード（例：スタバ、ゴールド、netWIN）" 
                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                    class="w-full text-xs font-bold text-slate-700 placeholder-slate-400 focus:outline-none bg-rose-50/40 border border-rose-100 rounded-2xl px-3 py-2"
+                    class="w-full text-xs font-bold text-slate-700 placeholder-slate-400 focus:outline-none bg-slate-50 border border-slate-200/80 rounded-2xl px-3 py-2"
                 >
-                <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden text-slate-400 hover:text-slate-600 px-2 py-1.5 text-xs font-bold bg-slate-100 rounded-xl shrink-0">✕</button>
-                <button type="button" onclick="triggerSearchNow()" class="bg-rose-400 hover:bg-rose-500 text-white text-xs font-extrabold px-3 py-2 rounded-2xl shrink-0">さがす</button>
+                <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden text-slate-400 px-2 py-1.5 text-xs font-bold bg-slate-100 rounded-xl shrink-0">✕</button>
+                <button type="button" onclick="triggerSearchNow()" class="bg-rose-400 hover:bg-rose-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-2xl shrink-0">検索</button>
             </div>
 
-            <!-- ワンタップで選べる人気キーワード -->
-            <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-rose-50 overflow-x-auto custom-scroll pb-1">
-                <span class="text-[10px] font-bold text-rose-400 shrink-0">人気ワード:</span>
-                <button type="button" onclick="quickSelect('オルカン')" class="text-[10px] font-bold bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full border border-teal-200 shrink-0">🌱 オルカン</button>
-                <button type="button" onclick="quickSelect('サンリオ')" class="text-[10px] font-bold bg-pink-50 text-pink-700 px-2.5 py-1 rounded-full border border-pink-200 shrink-0">🎀 サンリオ</button>
-                <button type="button" onclick="quickSelect('ディズニー')" class="text-[10px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200 shrink-0">🏰 ディズニー</button>
-                <button type="button" onclick="quickSelect('netWIN')" class="text-[10px] font-bold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200 shrink-0">✨ netWIN</button>
-                <button type="button" onclick="quickSelect('日経225')" class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">🇯🇵 日経225投信</button>
-                <button type="button" onclick="quickSelect('りそな')" class="text-[10px] font-bold bg-amber-50 text-amber-800 px-2.5 py-1 rounded-full border border-amber-200 shrink-0">🏦 りそな</button>
-                <button type="button" onclick="quickSelect('イオン')" class="text-[10px] font-bold bg-rose-50 text-rose-700 px-2.5 py-1 rounded-full border border-rose-200 shrink-0">🛒 イオン</button>
+            <!-- 金融商品のジャンル別クイック検索タグ -->
+            <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-100 overflow-x-auto custom-scroll pb-0.5">
+                <span class="text-[10px] font-bold text-slate-400 shrink-0">テーマ:</span>
+                <button type="button" onclick="quickSelect('人気投信')" class="text-[10px] font-bold bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full shrink-0">🌱 人気の投信</button>
+                <button type="button" onclick="quickSelect('ゴールド')" class="text-[10px] font-bold bg-amber-50 text-amber-800 px-2.5 py-1 rounded-full shrink-0">👑 金(ゴールド)</button>
+                <button type="button" onclick="quickSelect('債券')" class="text-[10px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full shrink-0">🛡️ 債券・バランス</button>
+                <button type="button" onclick="quickSelect('優待')" class="text-[10px] font-bold bg-pink-50 text-pink-700 px-2.5 py-1 rounded-full shrink-0">🎁 株主優待</button>
+                <button type="button" onclick="quickSelect('高配当')" class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full shrink-0">💰 高配当・ETF</button>
+                <button type="button" onclick="quickSelect('銀行')" class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full shrink-0">🏦 銀行・地銀</button>
+                <button type="button" onclick="quickSelect('REIT')" class="text-[10px] font-bold bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full shrink-0">🏙️ 不動産REIT</button>
             </div>
 
-            <!-- 検索候補パネル -->
-            <div id="searchResultPanel" class="hidden mt-3 pt-2.5 border-t-2 border-rose-100">
+            <!-- 検索予測＆マルチサイト横断結果パネル -->
+            <div id="searchResultPanel" class="hidden mt-3 pt-2.5 border-t border-rose-100">
                 <div class="flex justify-between items-center mb-2 px-1">
-                    <span id="searchResultTitle" class="text-[11px] font-extrabold text-rose-600">見つかった候補（タップで追加）</span>
+                    <span id="searchResultTitle" class="text-[11px] font-extrabold text-rose-500">検索候補（タップで追加・まなぶ）</span>
                     <button type="button" onclick="clearSearch()" class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">▲ 閉じる</button>
                 </div>
-                <div id="searchResultList" class="max-h-72 overflow-y-auto divide-y divide-rose-50 border border-rose-100 rounded-2xl bg-white custom-scroll"></div>
-                <div id="liveSearchStatus" class="hidden mt-1.5 px-2.5 py-1.5 bg-rose-50/70 rounded-xl text-[10px] font-bold text-rose-700 flex items-center justify-between">
-                    <span id="liveSearchStatusText">🌐 全国の株・投資信託からさがしています...</span>
+                <div id="searchResultList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-2xl bg-white custom-scroll"></div>
+                <div id="liveSearchStatus" class="hidden mt-1.5 px-2.5 py-1.5 bg-slate-50 rounded-xl text-[10px] font-bold text-slate-600 flex items-center justify-between">
+                    <span id="liveSearchStatusText">🌐 日経・Yahoo!・みんかぶ・株探から検索中...</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 3. お財布のあんしん分け方ナビ（専門用語を使わない資金管理） -->
-    <section class="soft-card rounded-3xl p-4 mb-4 bg-gradient-to-br from-white via-white to-rose-50/40">
-        <div class="flex justify-between items-center mb-1.5">
-            <h2 class="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
-                <span>👛</span> あんしんのお財布分け方ナビ
-            </h2>
-            <span id="macroBadge" class="text-[10px] font-bold bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full">今のムードに合わせて調整</span>
-        </div>
-        <p class="text-[11px] text-slate-500 mb-3 leading-relaxed">
-            一度にぜんぶ買わずに、<strong>「①まず少しだけ → ②安くなったら追加 → ③お守りの貯金」</strong>に分けておくと安心だよ。
-        </p>
-
-        <div class="grid grid-cols-2 gap-2.5 mb-3">
-            <div class="bg-rose-50/40 p-2.5 rounded-2xl border border-rose-100">
-                <label class="text-[10px] font-bold text-slate-500 block mb-1">使ってもいい予算 (円)</label>
-                <input type="number" id="budgetInput" value="100000" step="10000" class="w-full bg-white border border-rose-200 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-800 focus:border-rose-400 focus:outline-none" oninput="updateAllCalculations()">
+    <!-- 3. 折りたたみ式でスッキリ！「👛 お財布の分け方＆相場ムード設定」 -->
+    <section class="mb-3.5">
+        <div class="clean-card rounded-2xl px-3.5 py-2.5 bg-white">
+            <div onclick="toggleWalletBox()" class="flex justify-between items-center cursor-pointer">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm">👛</span>
+                    <span class="text-xs font-extrabold text-slate-700">お財布の分け方ナビ</span>
+                    <span id="walletSummaryLabel" class="text-[11px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">予算 10万円</span>
+                </div>
+                <span id="walletToggleArrow" class="text-xs font-bold text-slate-400">▼ 開く</span>
             </div>
-            <div class="bg-rose-50/40 p-2.5 rounded-2xl border border-rose-100">
-                <label class="text-[10px] font-bold text-slate-500 block mb-1">いまの世の中のムード</label>
-                <select id="macroSelect" class="w-full bg-white border border-rose-200 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-700 focus:border-rose-400 focus:outline-none" onchange="updateAllCalculations()">
-                    <option value="normal">☀️ ふつう（おだやか）</option>
-                    <option value="rate_hike">🏦 金利アップ（銀行に追い風）</option>
-                    <option value="shock">☔ みんなが慌てて値下がり中</option>
-                    <option value="overheat">🔥 盛り上がりすぎ（高め）</option>
-                </select>
+            <div id="walletDetailBox" class="hidden mt-3 pt-2.5 border-t border-slate-100 space-y-2.5">
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    一度にぜんぶ買わずに、<strong>「①まず少し → ②安くなったら追加 → ③お守りの残し」</strong>の3つに分けると失敗しにくいよ。
+                </p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-200/70">
+                        <label class="text-[10px] font-bold text-slate-500 block mb-0.5">投資の予算 (円)</label>
+                        <input type="number" id="budgetInput" value="100000" step="10000" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-800 focus:outline-none" oninput="updateAllCalculations()">
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-200/70">
+                        <label class="text-[10px] font-bold text-slate-500 block mb-0.5">世の中のムード</label>
+                        <select id="macroSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 focus:outline-none" onchange="updateAllCalculations()">
+                            <option value="normal">☀️ ふつう（穏やか）</option>
+                            <option value="rate_hike">🏦 金利アップ局面</option>
+                            <option value="shock">☔ 全体が値下がり中</option>
+                            <option value="overheat">🔥 盛り上がりすぎ</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="globalAllocationCards" class="grid grid-cols-3 gap-2 text-center"></div>
             </div>
         </div>
-        <div id="globalAllocationCards" class="grid grid-cols-3 gap-2 text-center"></div>
     </section>
 
-    <!-- 4. ジャンル切り替え ＆ 並び替えバー -->
+    <!-- 4. スッキリ分類タブ ＆ 並び替え -->
     <div class="flex items-center justify-between gap-2 mb-3">
-        <div class="flex gap-1 overflow-x-auto custom-scroll pb-1">
-            <button type="button" onclick="setFilter('ALL')" id="filter-ALL" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-rose-400 text-white shrink-0 shadow-xs">すべて</button>
-            <button type="button" onclick="setFilter('FUND')" id="filter-FUND" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-white text-slate-600 border border-rose-100 shrink-0">🌱 投資信託</button>
-            <button type="button" onclick="setFilter('STOCK')" id="filter-STOCK" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-white text-slate-600 border border-rose-100 shrink-0">🏢 会社の株</button>
-            <button type="button" onclick="setFilter('REIT')" id="filter-REIT" class="text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-white text-slate-600 border border-rose-100 shrink-0">🏙️ 不動産</button>
+        <div class="flex gap-1 overflow-x-auto custom-scroll pb-0.5">
+            <button type="button" onclick="setFilter('ALL')" id="filter-ALL" class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-rose-400 text-white shrink-0">すべて</button>
+            <button type="button" onclick="setFilter('FUND')" id="filter-FUND" class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-white text-slate-600 border border-slate-200 shrink-0">🌱 投信・ETF</button>
+            <button type="button" onclick="setFilter('STOCK')" id="filter-STOCK" class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-white text-slate-600 border border-slate-200 shrink-0">🏢 株</button>
+            <button type="button" onclick="setFilter('SAFE')" id="filter-SAFE" class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-white text-slate-600 border border-slate-200 shrink-0">👑 金・債券・REIT</button>
         </div>
-        <select id="sortSelect" onchange="renderWatchlist()" class="text-[11px] font-bold bg-white border border-rose-100 text-slate-700 rounded-2xl px-2.5 py-1.5 shrink-0">
-            <option value="default">いつもの順</option>
+        <select id="sortSelect" onchange="renderWatchlist()" class="text-[11px] font-bold bg-white border border-slate-200 text-slate-600 rounded-full px-2.5 py-1.5 shrink-0">
+            <option value="default">登録順</option>
             <option value="score_desc">おすすめ順</option>
             <option value="rsi_asc">お買い得順</option>
         </select>
     </div>
 
-    <!-- 5. チェック中の銘柄カードリスト -->
+    <!-- 5. シンプルで見やすい監視カードリスト -->
     <section>
         <div class="flex justify-between items-center mb-2 px-1">
-            <span class="text-[11px] font-bold text-slate-500">💝 カードをタップすると「やさしい解説と統計の根拠」が見られるよ</span>
+            <span class="text-[11px] font-bold text-slate-400">カードをタップすると「やさしい解説・学びメモ・グラフ」が開くよ</span>
             <span id="watchlistCounter" class="text-[11px] font-extrabold text-rose-500"></span>
         </div>
-        <div id="watchlistContainer" class="space-y-3"></div>
-        <div class="mt-6 flex justify-center gap-4">
+        <div id="watchlistContainer" class="space-y-2.5"></div>
+        <div class="mt-6 flex justify-center gap-5">
             <button type="button" onclick="openCustomModal()" class="text-[11px] font-bold text-rose-500 underline">
-                ＋ 番号や名前で直接追加する
+                ＋ コードや名前で直接追加
             </button>
-            <button type="button" onclick="resetToDefault()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600 underline">
+            <button type="button" onclick="resetToDefault()" class="text-[11px] font-semibold text-slate-400 underline">
                 最初のリストに戻す
             </button>
         </div>
     </section>
 
-    <!-- モーダル1: タップ時の詳細画面（やさしい提案 ＋ 統計データの根拠 ＋ 直近チャート） -->
-    <div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-[#fffaf7] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-rose-100 shadow-2xl max-h-[94vh] flex flex-col overflow-hidden">
-            <div class="header-grad px-4 py-3.5 flex justify-between items-center shrink-0">
+    <!-- モーダル1: 銘柄詳細シート（スッキリ整理：やさしい結論 ＋ 投資まなびメモ ＋ グラフ ＋ 統計根拠） -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-[#faf8f6] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="soft-header px-4 py-3.5 flex justify-between items-center shrink-0">
                 <div class="pr-2 min-w-0">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <span id="modalAssetBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/90 text-rose-600"></span>
+                    <div class="flex items-center gap-1.5">
+                        <span id="modalAssetBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white text-rose-600"></span>
                         <span id="modalCode" class="text-[11px] font-bold text-white/90"></span>
                     </div>
-                    <h3 id="modalTitle" class="text-sm sm:text-base font-extrabold text-white mt-0.5 line-clamp-1"></h3>
+                    <h3 id="modalTitle" class="text-sm sm:text-base font-extrabold text-white mt-0.5 truncate"></h3>
                 </div>
-                <button type="button" onclick="closeDetailModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold flex items-center justify-center text-base shrink-0">✕</button>
+                <button type="button" onclick="closeDetailModal()" class="w-8 h-8 rounded-full bg-white/20 text-white font-bold flex items-center justify-center text-base shrink-0">✕</button>
             </div>
-            <div id="modalBody" class="p-3.5 overflow-y-auto space-y-3.5 custom-scroll"></div>
-            <div class="bg-white px-4 py-2.5 border-t border-rose-100 flex gap-2 shrink-0">
+            <div id="modalBody" class="p-3.5 overflow-y-auto space-y-3 custom-scroll"></div>
+            <div class="bg-white px-4 py-2.5 border-t border-slate-200 flex gap-2 shrink-0">
                 <button type="button" id="deleteAssetBtn" class="px-3 py-2 rounded-2xl border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold">🗑️ 外す</button>
-                <button type="button" id="refreshSingleBtn" class="px-3 py-2 rounded-2xl border border-teal-200 bg-teal-50 text-teal-800 text-xs font-extrabold">🔄 最新データを取得</button>
-                <button type="button" onclick="closeDetailModal()" class="flex-1 py-2 rounded-2xl bg-rose-400 hover:bg-rose-500 text-white text-xs font-extrabold shadow-sm">わかった！閉じる</button>
+                <button type="button" id="refreshSingleBtn" class="px-3 py-2 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 text-xs font-extrabold">🔄 最新取得</button>
+                <button type="button" onclick="closeDetailModal()" class="flex-1 py-2 rounded-2xl bg-rose-400 text-white text-xs font-extrabold">閉じる</button>
             </div>
         </div>
     </div>
 
-    <!-- モーダル2: 📖 おすすめ銘柄・投資信託図鑑モーダル -->
-    <div id="catalogModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-rose-100 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-rose-100 flex justify-between items-center shrink-0">
+    <!-- モーダル2: 📖 いろいろな金融商品図鑑モーダル -->
+    <div id="catalogModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[88vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center shrink-0">
                 <div>
-                    <h3 class="text-sm font-extrabold text-slate-800">📖 株・投資信託のかんたん図鑑</h3>
-                    <p class="text-[10px] text-slate-500">気になるものをタップするだけでリストに追加できるよ</p>
+                    <h3 class="text-sm font-extrabold text-slate-800">📖 いろいろな金融商品図鑑</h3>
+                    <p class="text-[10px] text-slate-500">株・投信・金ゴールド・債券・REIT・ETFを追加して学べるよ</p>
                 </div>
-                <button type="button" onclick="closeCatalogModal()" class="w-8 h-8 rounded-full bg-rose-50 text-rose-500 font-bold flex items-center justify-center">✕</button>
+                <button type="button" onclick="closeCatalogModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
             </div>
-            <div class="p-3 bg-rose-50/40 border-b border-rose-100 shrink-0 space-y-2">
-                <input type="search" id="catalogSearchInput" placeholder="名前でさがす（例：サンリオ、日経225、千葉、イオン）" class="w-full bg-white border border-rose-200 rounded-2xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-400" oninput="renderCatalogList()">
+            <div class="p-3 bg-slate-50 border-b border-slate-100 shrink-0 space-y-2">
+                <input type="search" id="catalogSearchInput" placeholder="図鑑を検索（例：ゴールド、債券、サンリオ、netWIN）" class="w-full bg-white border border-slate-200 rounded-2xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none" oninput="renderCatalogList()">
                 <div class="flex gap-1.5 overflow-x-auto custom-scroll pb-1">
                     <button type="button" onclick="setCatalogCat('ALL')" id="cat-ALL" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-400 text-white shrink-0">すべて</button>
-                    <button type="button" onclick="setCatalogCat('投信')" id="cat-投信" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-rose-200 text-slate-700 shrink-0">🌱 人気の投資信託</button>
-                    <button type="button" onclick="setCatalogCat('優待')" id="cat-優待" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-rose-200 text-slate-700 shrink-0">🎁 身近な人気企業</button>
-                    <button type="button" onclick="setCatalogCat('銀行')" id="cat-銀行" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-rose-200 text-slate-700 shrink-0">🏦 銀行・金融</button>
-                    <button type="button" onclick="setCatalogCat('半導体')" id="cat-半導体" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-rose-200 text-slate-700 shrink-0">💎 AI・ハイテク</button>
-                    <button type="button" onclick="setCatalogCat('高配当')" id="cat-高配当" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-rose-200 text-slate-700 shrink-0">💰 配当が多い株</button>
+                    <button type="button" onclick="setCatalogCat('投信')" id="cat-投信" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border text-slate-600 shrink-0">🌱 投資信託</button>
+                    <button type="button" onclick="setCatalogCat('ゴールド')" id="cat-ゴールド" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border text-slate-600 shrink-0">👑 金・債券・バランス</button>
+                    <button type="button" onclick="setCatalogCat('ETF')" id="cat-ETF" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border text-slate-600 shrink-0">📊 上場ETF・REIT</button>
+                    <button type="button" onclick="setCatalogCat('優待')" id="cat-優待" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border text-slate-600 shrink-0">🎁 身近な優待株</button>
+                    <button type="button" onclick="setCatalogCat('銀行')" id="cat-銀行" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border text-slate-600 shrink-0">🏦 銀行・高配当</button>
+                    <button type="button" onclick="setCatalogCat('半導体')" id="cat-半導体" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border text-slate-600 shrink-0">💎 AI・ハイテク</button>
                 </div>
             </div>
-            <div id="catalogListContainer" class="p-3 overflow-y-auto divide-y divide-rose-50 space-y-1 custom-scroll flex-1"></div>
-            <div class="p-3 bg-white border-t border-rose-100 shrink-0">
-                <button type="button" onclick="closeCatalogModal()" class="w-full py-2.5 rounded-2xl bg-slate-100 text-slate-700 text-xs font-bold">閉じる</button>
+            <div id="catalogListContainer" class="p-3 overflow-y-auto divide-y divide-slate-100 flex-1 custom-scroll"></div>
+        </div>
+    </div>
+
+    <!-- モーダル3: 🎓 金融商品のしくみミニ講座モーダル -->
+    <div id="learnGuideModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[88vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-800">🎓 1分でわかる！金融商品のしくみ講座</h3>
+                    <p class="text-[10px] text-slate-500">それぞれの特徴を知ると、投資がもっと楽しくなるよ</p>
+                </div>
+                <button type="button" onclick="closeLearnGuideModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-4 overflow-y-auto space-y-3 text-xs custom-scroll">
+                <div class="bg-teal-50/70 p-3.5 rounded-2xl border border-teal-100 space-y-1">
+                    <div class="font-extrabold text-teal-900">🌱 投資信託（とうししんたく）ってなに？</div>
+                    <p class="text-[11px] text-slate-700 leading-relaxed">プロがたくさんの会社の株を詰め合わせた「おまかせパック」だよ。1つの会社が失敗しても他の会社がカバーしてくれるから、初心者さんのメイン資産に一番おすすめ！価格は1日1回（夜）に決まるよ。</p>
+                </div>
+                <div class="bg-sky-50/70 p-3.5 rounded-2xl border border-sky-100 space-y-1">
+                    <div class="font-extrabold text-sky-900">🏢 個別株（こべつかぶ）ってなに？</div>
+                    <p class="text-[11px] text-slate-700 leading-relaxed">サンリオやディズニー、銀行など「自分の好きな1社」を直接応援するチケットだよ。会社の利益から「配当金（お小遣い）」や「株主優待（プレゼント）」がもらえるのが楽しいポイント！</p>
+                </div>
+                <div class="bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-100 space-y-1">
+                    <div class="font-extrabold text-indigo-900">📊 ETF（上場投資信託）ってなに？</div>
+                    <p class="text-[11px] text-slate-700 leading-relaxed">「投資信託の詰め合わせパック」なのに、普通の株と同じように昼間の好きなタイミングでリアルタイムに買ったり売ったりできるいいとこ取りの商品だよ。</p>
+                </div>
+                <div class="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200 space-y-1">
+                    <div class="font-extrabold text-amber-900">👑 金（ゴールド）ってなに？</div>
+                    <p class="text-[11px] text-slate-700 leading-relaxed">世界中で価値が認められている実物資産だよ。戦争や不景気で「株が下がる時」に逆に値上がりしやすい性質があるから、お財布の「お守り」として少し持っておくと安心だよ。</p>
+                </div>
+                <div class="bg-blue-50/70 p-3.5 rounded-2xl border border-blue-100 space-y-1">
+                    <div class="font-extrabold text-blue-900">🛡️ 債券（さいけん）・バランス型ってなに？</div>
+                    <p class="text-[11px] text-slate-700 leading-relaxed">国や会社にお金を貸して利子をもらう仕組みだよ。株よりも値動きがずっと穏やかだから、ドキドキしたくない人にぴったり。株・債券・不動産を全部混ぜた「バランス型投信」もあるよ。</p>
+                </div>
+                <div class="bg-orange-50/70 p-3.5 rounded-2xl border border-orange-100 space-y-1">
+                    <div class="font-extrabold text-orange-900">🏙️ J-REIT（不動産投資信託）ってなに？</div>
+                    <p class="text-[11px] text-slate-700 leading-relaxed">みんなで少しずつお金を出し合って、大きなオフィスビルやホテル・マンションの大家さんになる商品だよ。集まった家賃のほとんどを分配金として配るから、利回りが高いのが特徴だよ。</p>
+                </div>
+            </div>
+            <div class="p-3 bg-white border-t border-slate-100 shrink-0">
+                <button type="button" onclick="closeLearnGuideModal()" class="w-full py-2.5 rounded-2xl bg-rose-400 text-white text-xs font-extrabold">よくわかった！閉じる</button>
             </div>
         </div>
     </div>
 
-    <!-- モーダル3: コード・名前での追加モーダル -->
-    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-5 border border-rose-100 shadow-2xl space-y-3">
+    <!-- モーダル4: コード・名前での追加モーダル -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 border border-slate-200 shadow-2xl space-y-3">
             <div class="flex justify-between items-center">
-                <h3 class="text-sm font-extrabold text-slate-800">📝 銘柄コード・名前で追加</h3>
+                <h3 class="text-sm font-extrabold text-slate-800">📝 コード・名前で直接追加</h3>
                 <button type="button" onclick="closeCustomModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 font-bold">✕</button>
             </div>
             <p class="text-[11px] text-slate-500 leading-relaxed">
-                株の4桁の番号（例: <code>8136</code>）や、投資信託の8桁コード（例: <code>47311988</code>, <code>3531299B</code>）を入れるだけで自動的にデータを取ってくるよ。
+                株・ETFの4桁番号（例: <code>1540</code>）や、投資信託の8桁コード（例: <code>47311988</code>）を入れると日経・Yahoo!・みんかぶから自動取得するよ。
             </p>
-            <div class="space-y-2.5 text-xs">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄コード / ファンドコード</label>
-                    <input type="text" id="custCode" placeholder="例: 8136 / 47311988 / AJ313178" class="w-full bg-rose-50/40 border border-rose-200 rounded-2xl px-3 py-2 font-bold text-slate-800">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 block mb-1">名前（コードを入れる場合は空欄でもOK）</label>
-                    <input type="text" id="custName" placeholder="例：サンリオ / 日経225ノーロード" class="w-full bg-rose-50/40 border border-rose-200 rounded-2xl px-3 py-2 font-bold text-slate-800">
-                </div>
+            <div class="space-y-2 text-xs">
+                <input type="text" id="custCode" placeholder="コード（例: 8136 / 1540 / 47311988）" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 font-bold">
+                <input type="text" id="custName" placeholder="名前（コード入力時は空欄でもOK）" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 font-bold">
                 <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 block mb-1">種類</label>
-                        <select id="custType" class="w-full bg-rose-50/40 border border-rose-200 rounded-2xl px-2.5 py-2 font-bold text-slate-700">
-                            <option value="FUND">🌱 投資信託</option>
-                            <option value="STOCK">🏢 会社の株</option>
-                            <option value="LEVERAGE">⚡ ブル型投信</option>
-                            <option value="REIT">🏙️ 不動産REIT</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 block mb-1">今の価格 (空欄で自動)</label>
-                        <input type="number" step="0.1" id="custPrice" placeholder="自動取得" class="w-full bg-rose-50/40 border border-rose-200 rounded-2xl px-3 py-2 font-bold text-slate-800">
-                    </div>
+                    <select id="custType" class="bg-slate-50 border border-slate-200 rounded-2xl px-2.5 py-2 font-bold">
+                        <option value="FUND">🌱 投資信託</option>
+                        <option value="STOCK">🏢 会社の株</option>
+                        <option value="ETF">📊 上場ETF</option>
+                        <option value="GOLD">👑 金・コモディティ</option>
+                        <option value="BOND">🛡️ 債券・バランス</option>
+                        <option value="REIT">🏙️ 不動産REIT</option>
+                        <option value="LEVERAGE">⚡ ブル型投信</option>
+                    </select>
+                    <input type="number" step="0.1" id="custPrice" placeholder="価格(空欄で自動)" class="bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 font-bold">
                 </div>
             </div>
-            <div class="flex gap-2 pt-2">
+            <div class="flex gap-2 pt-1">
                 <button type="button" onclick="closeCustomModal()" class="flex-1 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-bold">やめる</button>
-                <button type="button" onclick="submitCustomAsset()" class="flex-1 py-2.5 rounded-2xl bg-rose-400 text-white text-xs font-extrabold shadow-sm">追加する</button>
+                <button type="button" onclick="submitCustomAsset()" class="flex-1 py-2.5 rounded-2xl bg-rose-400 text-white text-xs font-extrabold">追加する</button>
             </div>
         </div>
     </div>
 
     <!-- =========================================================================
-         スクリプト第1部：フルスペック・マスター辞書 ＆ 4重ライブ検索・データ取得基盤
+         スクリプト第1部：多彩な金融商品マスター辞書 ＆ 5重マルチサイト検索エンジン
+         （日経電子版・株探・Yahoo!ファイナンス・みんかぶ投信・みんかぶ株式）
     ========================================================================== -->
     <script>
+        // フォーマット: id|name|assetClass|sector|price|ma25|rsi|bb|change|pts|fMeta|proxyEtf|keywords|desc
         const MASTER_DATA_LINES = `
-0331418A|eMAXIS Slim 全世界株式 (オール・カントリー)|FUND|世界中の会社にまるごと投資|29694|30850|45|-0.8|+0.32%||13.7兆円(1位)/0.05775%/+22.4%|2559.T|おるかん オルカン 全世界 オールカントリー emaxis slim 投信 NISA|世界中の約3,000社にこれ1つで分散投資できる、日本で一番人気の安心ファンドだよ。手数料もとっても安く、毎月のコツコツ積立にぴったり！
-03311187|eMAXIS Slim 米国株式 (S&P500)|FUND|アメリカの有名な大企業500社|42755|43900|44|-0.9|-4.62%||12.6兆円(2位)/0.0814%/+24.1%|2558.T|べいこく 米国 S&P500 SP500 emaxis slim 投信 NISA|iPhoneのAppleやAmazonなど、アメリカを代表する強い会社500社にまとめて投資する人気ファンドだよ。最近すこし値下がりして買いやすくなっているよ。
-47311988|日経２２５ノーロードオープン|FUND|日本の有名な会社225社に投資|44529|45120|46|-0.5|+2.32% (+1,011円)||4,756億円/0.55%/+21.8%|1321.T|にっけい 日経225 ノーロード オープン アセットマネジメントOne 投信|日本のニュースで毎日流れる「日経平均」と同じ動きをする大型ファンドだよ。最近の平均価格より少しお安めな位置にいるから、買い増しにも向いているよ。
-AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コストで日本の代表企業に投資|35159|35620|46|-0.5|+2.33% (+802円)||434億円/0.187%/+22.4%|1321.T|すまーとあい smart-i smarti スマートi 日経225 りそな 投信 NISA|りそなグループが運用している、手数料がとっても安い日経平均連動ファンドだよ。長くコツコツ持ち続けるのにとっても安心な設計だよ。
-3531299B|netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)|FUND|アメリカの最先端IT・AI企業|48494|46800|58|0.8|+2.08% (+987円)||1兆5,345億円/2.09%/+17.95%|2244.T|netwin ねっとうぃん ネットウィン GS ゴールドマン テクノロジー 米国 ハイテク AI 投信 NISA|AIやクラウドで世界をリードするアメリカのハイテク企業をプロが厳選して運用する超大型ファンドだよ。元気に成長が続いているよ。
-3531199B|netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)|FUND|米国の最先端IT(円高の備えつき)|26850|26100|56|0.6|+1.94% (+510円)||1,850億円/2.09%/+12.4%|2244.T|netwin ねっとうぃん ネットウィン GS Aコース 為替ヘッジあり 投信|netWINに「円高になっても損しにくいバリア（為替ヘッジ）」をつけたコースだよ。
-18312991|インベスコ 世界厳選株式オープン(毎月決算型)【世界のベスト】|FUND|世界の優良株＋毎月お小遣い分配|8596|8680|48|-0.3|+0.66%||4.6兆円(3位)/1.903%/+18.5%|2559.T|いんべすこ インベスコ 世界厳選 世界のベスト 毎月分配 高配当 投信|愛称『世界のベスト』。世界中のしっかり稼ぐ優良企業に投資して、毎月分配金を出すタイプで大人気になっているファンドだよ。
-39312149|アライアンス・バーンスタイン・米国成長株投信 Dコース|FUND|米国の成長企業＋毎月の分配金|11240|11350|49|-0.2|+1.08%||2.68兆円(5位)/1.727%/+21.2%|2558.T|あらいあんす アライアンス バーンスタイン AB 米国成長株 Dコース 毎月分配 投信|アメリカの成長力が高い企業に投資しながら、成績に応じて毎月分配金がもらえる大人気のファンドだよ。
-39312065|アライアンス・バーンスタイン・米国成長株投信 Bコース|FUND|米国の成長企業をじっくり育てる|72450|71900|53|0.3|+1.07%||1.69兆円(7位)/1.727%/+21.5%|2558.T|あらいあんす アライアンス バーンスタイン AB 米国成長株 Bコース NISA 投信|分配金を出さずに、利益をそのまま再投資して雪だるま式に大きく育てるコース（新NISA対応）だよ。
-89311199|SBI・V・S&P500インデックス・ファンド|FUND|アメリカの代表500社に低コスト投資|31890|32100|48|-0.3|+0.76%||2.97兆円(4位)/0.0938%/+23.9%|2558.T|えすびーあい SBI V S&P500 SP500 バンガード 投信 NISA|世界最大級の運用会社バンガードと一緒にアメリカのS&P500へ投資する、安心感抜群のファンドだよ。
-9I312179|楽天・全米株式インデックス・ファンド【楽天・VTI】|FUND|アメリカ中の約4,000社にまるごと投資|34120|34300|49|-0.2|+0.68%||2.56兆円(6位)/0.162%/+23.1%|2558.T|らくてん 楽天 全米 VTI 楽天VTI 米国 投信 NISA|大企業だけでなく、これから大きくなるアメリカの若い会社まで約4,000社を丸ごと応援できるファンドだよ。
-9I311249|楽天・高配当株式・米国ファンド【楽天SCHD】|FUND|配当金をたくさん出す米国の優良企業|10840|10650|54|0.4|+0.35%||3,450億円/0.192%/+14.2%|2558.T|らくてん 楽天 SCHD 米国 高配当 分配金 投信 NISA|10年以上ずっと配当金を出し続けている、アメリカのしっかりした会社100社に投資する人気ファンドだよ。
-04311181|iFreeNEXT FANG+インデックス|FUND|アメリカの超巨大テック10社に集中|64200|61800|61|1.1|+1.45%||1.32兆円/0.7755%/+34.2%|2244.T|ふぁんぐ FANG FANG+ ifree 米国 ハイテク AI ビッグテック 投信 NISA|Apple、Google、Amazon、NVIDIAなど誰もが知るアメリカの超主役企業10社だけに集中投資するパワフルなファンドだよ。
-01312098|野村世界業種別投資シリーズ(世界半導体株投資)|FUND|世界中のトップ半導体メーカーに投資|162400|165000|46|-0.4|+1.63%||1.35兆円/1.65%/+38.5%|2244.T|のむら 野村 世界半導体 半導体 NVIDIA TSMC 投信 NISA|AIの頭脳になる「半導体」を作る世界トップ企業を集めたファンドだよ。
-2931113C|ニッセイ日経２２５インデックスファンド|FUND|日本の代表225社に投資|41280|41800|46|-0.5|+2.31%||2,650億円/0.275%/+22.0%|1321.T|にっせい ニッセイ 日経225 インデックス 投信|日本の代表的な225社にまとめて投資できる、実績の長い定番ファンドだよ。
-4731115C|たわらノーロード 日経２２５|FUND|日本の代表225社に低コスト投資|38450|38900|46|-0.5|+2.32%||1,980億円/0.143%/+22.2%|1321.T|たわら たわらノーロード 日経225 投信 NISA|購入手数料ゼロ・低コストで日本の日経平均に連動する人気ファンドだよ。
-9C311125|ひふみプラス|FUND|日本の元気な成長企業を発掘|61250|60100|54|0.4|+1.27%||5,420億円/1.078%/+15.4%|1306.T|ひふみ ひふみプラス レオス 藤野 国内株 投信 NISA|プロが直接会社を取材して、これから伸びる日本の元気な会社を見つけて投資する有名ファンドだよ。
-9I31115A|楽天日本株4.3倍ブル|LEVERAGE|日経平均の4.3倍動く上級者向け投信|54773|76500|38|-1.4|+11.90%||684億円/1.243%/-12.4%|1570.T|らくてん 楽天 4.3倍 ブル レバレッジ 日経 先物 投信 bull|普通の株の「4.3倍」のスピードで激しく上下するジェットコースターのような商品だよ。長く持つと自然に目減りしちゃうから、大きく下がった時の短い期間だけのお試しにしようね。
-8136|サンリオ|STOCK|ハローキティ・キャラクターIP|4620|4380|64|1.3|+2.40%||||さんりお サンリオ ハローキティ クロミ シナモロール キャラ IP エンタメ 優待|ハローキティやクロミちゃんたちが今アメリカやアジアでも大人気！ピューロランドの優待券も人気で、とっても元気よく成長している会社だよ。
-4661|オリエンタルランド (ディズニー)|STOCK|東京ディズニーリゾート運営|3680|3890|29|-1.9|-0.90%||||おりえんたるらんど オリエンタルランド ディズニー テーマパーク 株主優待 優待|東京ディズニーランド・シーを運営している会社だよ。最近は株価がずいぶん下がって「バーゲンセール」のような位置に来ているから、少しずつ集めるのに注目のタイミングだよ。
-8267|イオン|STOCK|ショッピングモール・お買い物優待|3720|3680|52|0.2|+0.30%||||いおん イオン スーパー 株主優待 オーナーズカード 内需 小売 優待|毎日のお買い物金額がキャッシュバックされる「オーナーズカード（株主優待）」が大人気！みんなが手放さないから株価が下がりにくい安心感のある株だよ。
-9983|ファーストリテイリング (ユニクロ)|STOCK|ユニクロ・GUを世界展開|48500|47600|57|0.7|+1.15%||||ふぁーすとりていりんぐ ユニクロ GU アパレル 日経平均 優待|おなじみのユニクロとGUを世界中で展開している日本トップのアパレル企業だよ。海外でもすごく売れていて業績がしっかりしているよ。
-7974|任天堂|STOCK|Switch・マリオ・ポケモン|8350|8120|59|0.8|+1.10%||||にんてんどう 任天堂 ゲーム スイッチ マリオ ポケモン IP 優待|マリオやポケモンなど世界中の人が大好きなゲームを作っている、借金ゼロのお金持ち企業だよ。映画やグッズも好調で安心して見ていられる株だよ。
-4452|花王|STOCK|日用品・コスメ(35期連続増配)|6420|6350|51|0.2|+0.45%||||かおう 花王 ビオレ アタック 化粧品 日用品 連続増配 高配当 優待|洗剤やビオレ、コスメなど毎日の暮らしに欠かせない商品を作っている会社だよ。30年以上ずっと配当金を増やし続けている優等生だよ。
-4911|資生堂|STOCK|グローバル化粧品トップ|2890|3050|34|-1.5|-0.80%||||しせいどう 資生堂 コスメ 化粧品 美容 優待|日本を代表する化粧品メーカーだよ。中国向けの売上減少で株価が大きく下がっているから、統計的には「売られすぎ（割安圏）」の位置にあるよ。
-2702|日本マクドナルドホールディングス|STOCK|マクドナルド・大人気食事券優待|6380|6340|50|0.1|+0.15%||||まくどなるど マクドナルド マック ハンバーガー 株主優待 外食 優待|バーガーやサイドメニュー・ドリンクの無料引換券がもらえる株主優待が大人気！株価の揺れがとても小さくて初心者さんに優しい株だよ。
-8308|りそなホールディングス|STOCK|個人と街の会社に寄り添う大手銀行|2191.5|2265|46|-0.6|+1.30% (PTS)|2220:+28.5 (+1.30%)|||りそな りそな銀行 銀行 金利 メガバンク 金融 高配当|個人や中小企業へのサポートと不動産・信託に強い大手銀行グループだよ。日本の金利が上がると銀行の利益が増えやすく、今は最近の平均より少しお安めな押し目ゾーンにいるよ。
-8331|千葉銀行|STOCK|千葉県トップの大型地方銀行|2498.5|2515|51|-0.1|+5.11%|2630:+131.5 (+5.26%)|||ちば 千葉 千葉銀行 ちばぎん 地銀 地方銀行 銀行 金利 金融|千葉県を中心にとても強い基盤を持つトップクラスの地方銀行だよ。良い決算を発表して夜間の取引（PTS）でも元気に上がっているよ。
-8306|三菱UFJフィナンシャル・グループ|STOCK|日本で一番大きな銀行グループ|3366|3380|52|-0.1|+4.40%|3415:+49 (+1.46%)|||みつびしUFJ 三菱UFJ 銀行 メガバンク 高配当 金利 金融 mufg|日本で一番大きな銀行グループだよ。配当金もしっかり出していて、長く持つお守り株としてとっても人気があるよ。
-8316|三井住友フィナンシャルグループ|STOCK|配当を絶対に減らさない方針の銀行|3126|3140|51|-0.1|+3.92%|3158:+32 (+1.02%)|||みついすみとも 三井住友 銀行 メガバンク 高配当 金利 金融 smfg|「配当金を減らさずに維持・増やしていくよ（累進配当）」と約束してくれている、個人投資家に大人気のメガバンクだよ。
-8411|みずほフィナンシャルグループ|STOCK|3大メガバンク・高配当|3810|3760|54|0.4|+1.87%|3845:+35 (+0.92%)|||みずほ 銀行 メガバンク 高配当 金利 金融 mizuho|日本の大企業とたくさん取引している3大メガバンクのひとつだよ。
-8354|ふくおかフィナンシャルグループ|STOCK|九州トップの大型地方銀行|6676|6780|48|-0.3|+3.79%|6710:+34 (+0.51%)|||ふくおか 福岡 福岡銀行 ふくおかFG 地銀 地方銀行 銀行|半導体工場ができて盛り上がっている九州エリアを支える、頼もしい地方銀行グループだよ。
+0331418A|eMAXIS Slim 全世界株式 (オール・カントリー)|FUND|世界中の株パック|29694|30850|45|-0.8|+0.32%||13.7兆円/0.05775%/+22.4%|2559.T|おるかん オルカン 全世界 オールカントリー 人気投信 投信 NISA|世界中の約3,000社にこれ1つで分散投資できる、日本で一番人気の安心ファンドだよ。
+03311187|eMAXIS Slim 米国株式 (S&P500)|FUND|米国トップ500社パック|42755|43900|44|-0.9|-4.62%||12.6兆円/0.0814%/+24.1%|2558.T|べいこく 米国 S&P500 SP500 人気投信 投信 NISA|AppleやAmazonなどアメリカを代表する強い会社500社にまとめて投資する王道ファンドだよ。
+47311988|日経２２５ノーロードオープン|FUND|日本の代表225社パック|44529|45120|46|-0.5|+2.32% (+1,011円)||4,756億円/0.55%/+21.8%|1321.T|にっけい 日経225 ノーロード オープン 人気投信 投信|ニュースで毎日流れる「日経平均」と同じ動きをする大型ファンドだよ。日本の有名企業をまとめて応援できるよ。
+AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コスト日本株パック|35159|35620|46|-0.5|+2.33% (+802円)||434億円/0.187%/+22.4%|1321.T|すまーとあい smart-i スマートi 日経225 りそな 人気投信 投信 NISA|りそなグループが運用する、手数料がとっても安い日経平均連動ファンドだよ。
+3531299B|netWIN GSテクノロジー株式ファンド Bコース|FUND|米国の最先端AI・IT企業|48494|46800|58|0.8|+2.08% (+987円)||1.53兆円/2.09%/+17.95%|2244.T|netwin ねっとうぃん ネットウィン GS テクノロジー 人気投信 投信 NISA|ゴールドマン・サックスのプロが、AIやクラウドで成長するアメリカのハイテク企業を厳選して運用する大型ファンドだよ。
+3531199B|netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)|FUND|米国IT(円高バリア付き)|26850|26100|56|0.6|+1.94% (+510円)||1,850億円/2.09%/+12.4%|2244.T|netwin ねっとうぃん ネットウィン Aコース 為替ヘッジ 投信|netWINに「円高になっても損しにくい工夫（為替ヘッジ）」をつけたコースだよ。
+18312991|インベスコ 世界厳選株式オープン【世界のベスト】|FUND|世界優良株(毎月お小遣い型)|8596|8680|48|-0.3|+0.66%||4.6兆円/1.903%/+18.5%|2559.T|いんべすこ インベスコ 世界厳選 世界のベスト 毎月分配 人気投信 投信|世界中の優良企業に投資して、毎月分配金を出すタイプで大人気になっているファンドだよ。
+39312149|アライアンス・バーンスタイン・米国成長株投信 Dコース|FUND|米国成長株(毎月分配型)|11240|11350|49|-0.2|+1.08%||2.68兆円/1.727%/+21.2%|2558.T|あらいあんす アライアンス AB 米国成長株 Dコース 人気投信 投信|アメリカの成長企業に投資しながら、成績に応じて毎月分配金がもらえる人気ファンドだよ。
+9I311249|楽天・高配当株式・米国ファンド【楽天SCHD】|FUND|米国の連続増配100社パック|10840|10650|54|0.4|+0.35%||3,450億円/0.192%/+14.2%|2558.T|らくてん 楽天 SCHD 米国 高配当 分配金 人気投信 投信 NISA|10年以上ずっと配当金を出し続けているアメリカの優良企業100社に投資する高配当ファンドだよ。
+04311181|iFreeNEXT FANG+インデックス|FUND|米国スター企業10社集中|64200|61800|61|1.1|+1.45%||1.32兆円/0.7755%/+34.2%|2244.T|ふぁんぐ FANG FANG+ ifree ハイテク AI 人気投信 投信 NISA|Apple・Google・NVIDIAなどアメリカの超主役テック10社だけに集中投資するパワフルなファンドだよ。
+01312098|野村世界業種別投資シリーズ(世界半導体株投資)|FUND|世界の半導体トップ企業|162400|165000|46|-0.4|+1.63%||1.35兆円/1.65%/+38.5%|2244.T|のむら 野村 世界半導体 半導体 人気投信 投信 NISA|AIの頭脳になる「半導体」を作る世界トップ企業を集めたファンドだよ。
+9C311125|ひふみプラス|FUND|日本の元気な成長企業発掘|61250|60100|54|0.4|+1.27%||5,420億円/1.078%/+15.4%|1306.T|ひふみ ひふみプラス レオス 国内株 人気投信 投信 NISA|プロが会社を取材して、これから伸びる日本の元気な会社を見つけて投資する有名ファンドだよ。
+8931223C|SBI・iシェアーズ・インド株式【サクっとインド】|FUND|急成長するインドの代表企業|14250|14600|44|-0.8|+0.95%||1,950億円/0.4638%/+18.2%|1678.T|いんど インド株 SBI サクっとインド 新興国 投信 NISA|人口が増えて経済がぐんぐん成長しているインドの主要企業に投資できるファンドだよ。
+89311239|SBI・iシェアーズ・ゴールドファンド(為替ヘッジなし)|GOLD|金(ゴールド)に投資する投信|14820|14450|59|0.8|+1.15%||850億円/0.1838%/+32.5%|1540.T|きん ゴールド 金 gold お守り インフレ 投信 NISA|100円から「金（ゴールド）」に投資できる人気の投資信託だよ。株が下がる時のショックを和らげるお守りになるよ。
+03311179|三菱UFJ 純金ファンド【ファインゴールド】|GOLD|国内保管の純金ファンド|38900|37800|60|0.9|+1.20%||1,620億円/0.99%/+34.0%|1540.T|きん ゴールド 純金 ファインゴールド 金 投信 NISA|日本の貴金属市場の純金価格に連動する伝統的なゴールド投資信託だよ。
+1540|純金上場信託 (現物国内保管型)|GOLD|株のように買える金ETF|13450|13100|58|0.7|+1.10%|||1540.T|きん ゴールド 純金 1540 ETF 金 現物 お守り|本物の金（ゴールド）が日本国内に保管されていて、株と同じようにリアルタイムで売買できる大人気ETFだよ。
+03316172|eMAXIS Slim バランス(8資産均等型)|BOND|株・債券・不動産の全部入り|17450|17520|48|-0.2|+0.25%||3,100億円/0.143%/+11.5%|1489.T|ばらんす バランス 8資産 債券 不動産 安定 投信 NISA|日本・先進国・新興国の「株・債券・REIT（不動産）」の8つの資産に12.5%ずつ均等に分けて投資する、値動きがとっても穏やかな安心パックだよ。
+89312235|SBI・iシェアーズ・米国総合債券インデックス|BOND|アメリカの国債・社債パック|10420|10510|45|-0.5|+0.18%||420億円/0.0938%/+5.8%|2558.T|さいけん 債券 米国債 利子 安定 投信 NISA|アメリカ政府や優良企業にお金を貸して利子を受け取る「債券」のファンドだよ。株よりも値動きがマイルドなのが特徴だよ。
+03311173|eMAXIS Slim 先進国債券インデックス|BOND|世界の安全な国債パック|13280|13350|46|-0.4|+0.20%||1,450億円/0.154%/+6.4%|2559.T|さいけん 債券 先進国債券 国債 安定 投信 NISA|アメリカやヨーロッパなど先進国の国債に分散投資して、コツコツ安定した利回りを目指すファンドだよ。
+1489|NEXT FUNDS 日経平均高配当株50指数連動型上場投信|ETF|日本の高配当50社パックETF|2345|2380|44|-0.6|+0.85%|||1489.T|こうはいとう 高配当 ETF 1489 分配金 日本株 NISA|日経平均の中から「特に配当金をたくさん出す50社」だけを詰め合わせた大人気ETFだよ。年4回チャリンと分配金がもらえるよ。
+1343|NEXT FUNDS 東証REIT指数連動型上場投信|REIT|日本の不動産まるごとETF|1725|1755|41|-1.0|-0.25%|||1343.T|りーと REIT 不動産 ETF 1343 家賃 分配金 NISA|東証に上場するすべての不動産（J-REIT）にこれ1本でまるごと分散投資できるETFだよ。数千円から不動産オーナーになれるよ。
+8951|日本ビルファンド投資法人|REIT|都心オフィスビルの大家さん|124500|126800|38|-1.3|-0.32%||||りーと REIT 不動産 ビル 分配金 高配当 三井不動産 ETF|三井不動産が運営する都心の一等地オフィスビルから家賃収入をもらうJ-REITの王様だよ。
+9I31115A|楽天日本株4.3倍ブル|LEVERAGE|日経平均の4.3倍動く短期用投信|54773|76500|38|-1.4|+11.90%||684億円/1.243%/-12.4%|1570.T|らくてん 楽天 4.3倍 ブル レバレッジ 日経 投信|通常の4.3倍のスピードで激しく上下する上級者向け商品だよ。大きく下がった時の数日〜数週間のお試し専用にしようね。
+8136|サンリオ|STOCK|ハローキティ・キャラクターIP|4620|4380|64|1.3|+2.40%||||さんりお サンリオ ハローキティ クロミ シナモロール キャラ 優待|キティちゃんやクロミちゃんが今世界中で大人気！ピューロランドの優待券も魅力の元気な会社だよ。
+4661|オリエンタルランド (ディズニー)|STOCK|東京ディズニーリゾート運営|3680|3890|29|-1.9|-0.90%||||おりえんたるらんど オリエンタルランド ディズニー テーマパーク 優待|東京ディズニーランド・シーを運営する会社だよ。今は株価がずいぶん下がって「バーゲンセール圏」に来ているよ。
+8267|イオン|STOCK|お買い物キャッシュバック優待|3720|3680|52|0.2|+0.30%||||いおん イオン スーパー 株主優待 オーナーズカード 優待|毎日のお買い物が3%〜7%キャッシュバックされる「オーナーズカード」が大人気の安心株だよ。
+3099|三越伊勢丹ホールディングス|STOCK|デパートお買い物10%割引優待|2280|2340|43|-0.7|+1.15%||||みつこしいせたん 三越 伊勢丹 百貨店 デパート コスメ 優待|三越や伊勢丹でのお買い物やデパコスが「10%割引」になる株主優待カードが女性に大人気の株だよ。
+3543|コメダホールディングス|STOCK|コメダ珈琲の電子マネー優待|2810|2790|51|0.1|+0.35%||||こめだ コメダ コメダ珈琲 カフェ シロノワール コーヒー 優待|全国のコメダ珈琲店で使えるプリペイドカード（KOMECA）に毎年優待チャージがもらえるカフェ株だよ。
+2702|日本マクドナルドホールディングス|STOCK|マクドナルド食事券優待|6380|6340|50|0.1|+0.15%||||まくどなるど マクドナルド マック ハンバーガー 外食 優待|バーガー・サイド・ドリンクの引換券冊子がもらえる大人気優待株！株価の揺れがとても小さいよ。
+7550|ゼンショーホールディングス (すき家・はま寿司)|STOCK|はま寿司・ココス等の食事優待|7850|7680|56|0.6|+1.40%||||ぜんしょー ゼンショー はま寿司 ココス すき家 外食 優待|はま寿司やココス、すき家で使えるお食事優待券がもらえる日本最大の外食グループだよ。
+4452|花王|STOCK|日用品・コスメ(35期連続増配)|6420|6350|51|0.2|+0.45%||||かおう 花王 ビオレ アタック 化粧品 日用品 連続増配 高配当 優待|ビオレや洗剤、コスメなど毎日の暮らしを支え、35年も連続で配当金を増やし続けている優等生だよ。
+4911|資生堂|STOCK|グローバル化粧品トップ|2890|3050|34|-1.5|-0.80%||||しせいどう 資生堂 コスメ 化粧品 美容 優待|日本を代表するコスメ企業だよ。株価が大きく下がっているため、統計的には「売られすぎの割安圏」にあるよ。
+9020|東日本旅客鉄道 (JR東日本)|STOCK|新幹線・Suica・駅ビル(優待割引)|2860|2890|46|-0.4|+0.55%||||じぇいあーる JR東日本 新幹線 鉄道 旅行 ルミネ 優待|新幹線や特急の運賃が4割引になる株主優待券や駅ビル（ルミネ・アトレ）でなじみ深い安心のインフラ株だよ。
+9983|ファーストリテイリング (ユニクロ)|STOCK|ユニクロ・GUを世界展開|48500|47600|57|0.7|+1.15%||||ふぁーすとりていりんぐ ユニクロ GU アパレル 優待|おなじみのユニクロとGUを世界中で展開している日本トップのアパレル企業だよ。
+7974|任天堂|STOCK|Switch・マリオ・ポケモン|8350|8120|59|0.8|+1.10%||||にんてんどう 任天堂 ゲーム スイッチ マリオ ポケモン 優待|マリオやポケモンなど世界中が大好きなゲームを作る、借金ゼロのお金持ち企業だよ。
+8308|りそなホールディングス|STOCK|個人と街の会社に寄り添う大手銀行|2191.5|2265|46|-0.6|+1.30% (PTS)|2220:+28.5 (+1.30%)|||りそな りそな銀行 銀行 金利 メガバンク 金融 高配当|個人や中小企業へのサポートと不動産・信託に強い大手銀行グループだよ。金利アップが追い風で、今は平均より少しお安めな位置にいるよ。
+8331|千葉銀行|STOCK|千葉県トップの大型地方銀行|2498.5|2515|51|-0.1|+5.11%|2630:+131.5 (+5.26%)|||ちば 千葉 千葉銀行 ちばぎん 地銀 地方銀行 銀行 金利|千葉県を中心に強い基盤を持つトップクラスの地方銀行だよ。好決算で夜間の取引（PTS）でも元気に上がっているよ。
+8306|三菱UFJフィナンシャル・グループ|STOCK|日本で一番大きな銀行グループ|3366|3380|52|-0.1|+4.40%|3415:+49 (+1.46%)|||みつびしUFJ 三菱UFJ 銀行 メガバンク 高配当 金利 mufg|日本で一番大きな銀行グループだよ。配当もしっかりしていて長く持つお守り株として大人気だよ。
+8316|三井住友フィナンシャルグループ|STOCK|配当を減らさない方針の銀行|3126|3140|51|-0.1|+3.92%|3158:+32 (+1.02%)|||みついすみとも 三井住友 銀行 メガバンク 高配当 金利 smfg|「配当金を減らさずに維持・増やしていくよ（累進配当）」と約束している人気のメガバンクだよ。
+8411|みずほフィナンシャルグループ|STOCK|3大メガバンク・高配当|3810|3760|54|0.4|+1.87%|3845:+35 (+0.92%)|||みずほ 銀行 メガバンク 高配当 金利 mizuho|日本の大企業とたくさん取引している3大メガバンクのひとつだよ。
+8354|ふくおかフィナンシャルグループ|STOCK|九州トップの大型地方銀行|6676|6780|48|-0.3|+3.79%|6710:+34 (+0.51%)|||ふくおか 福岡 福岡銀行 ふくおかFG 地銀 地方銀行 銀行|半導体工場で盛り上がる九州エリアを支えるトップ地銀グループだよ。
 7186|コンコルディア・FG (横浜銀行)|STOCK|横浜銀行・首都圏トップ地銀|1582.5|1610|47|-0.4|+2.69%||||よこはま 横浜 横浜銀行 コンコルディア 地銀 地方銀行 銀行 高配当|横浜銀行を中心とする首都圏最大の地方銀行グループだよ。
-5831|しずおかFG (静岡銀行)|STOCK|静岡銀行・貯金がしっかりした優良地銀|1845|1860|49|-0.2|+1.93%||||しずおか 静岡 静岡銀行 しずおかFG 地銀 地方銀行 銀行|経営の安全性がトップクラスに高い静岡銀行のグループだよ。
-7167|めぶきフィナンシャルグループ|STOCK|常陽銀行・足利銀行の北関東地銀|925|935|48|-0.3|+1.87%||||めぶき 常陽銀行 足利銀行 茨城 栃木 地銀 地方銀行 銀行 高配当|10万円以下から買えて配当金もしっかりもらえる北関東の銀行グループだよ。
-8334|群馬銀行|STOCK|群馬県トップの地方銀行|1285|1295|49|-0.2|+2.80%||||ぐんま 群馬 群馬銀行 ぐんぎん 地銀 地方銀行 銀行 高配当|株主への配当や還元を積極的に増やしている北関東の有力銀行だよ。
-5838|楽天銀行|STOCK|口座数ナンバーワンのネット銀行|4980|4820|58|0.7|+2.68%||||らくてんぎんこう 楽天銀行 ネット銀行 金利 銀行|スマホで使える国内最大のネット銀行だよ。金利が上がるとグンと利益が増える成長株だよ。
-7182|ゆうちょ銀行|STOCK|郵便局の銀行・高配当|1645|1630|52|0.2|+1.54%||||ゆうちょ ゆうちょ銀行 郵便局 銀行 高配当 金利|全国の郵便局でおなじみの銀行だよ。値動きが穏やかで配当金が多いのが魅力だよ。
-8591|オリックス|STOCK|リース・金融・不動産の万能企業|3380|3340|51|0.2|+0.45%||||おりっくす オリックス リース 金融 高配当 不動産|レンタカーや空港運営、ホテル、金融まで何でもこなす高配当の人気企業だよ。
-8593|三菱HCキャピタル|STOCK|25年以上ずっと増配中のリース会社|1045|1035|52|0.2|+0.68%||||みつびしえいちしー 三菱HCキャピタル リース 高配当 連続増配|25年以上も毎年欠かさず配当金を増やし続けている、コツコツ投資家に大人気の会社だよ。
-8766|東京海上ホールディングス|STOCK|日本トップの保険会社・高配当|5640|5580|52|0.3|+0.60%||||とうきょうかいじょう 東京海上 保険 損保 高配当 金融|日本で一番大きな損害保険グループだよ。毎年のように配当金を増やしてくれる頼もしい株だよ。
-285A|キオクシアホールディングス|STOCK|スマホやAIのデータを保存する半導体|8621|10450|34|-1.6|+1.29%|8690:+69 (+0.80%)|||きおくしあ キオクシア kioxia 半導体 メモリ NAND フラッシュ 東芝 AI|iPhoneやAIサーバーの中で「記憶（データ保存）」を担当する半導体メモリを作る世界的な会社だよ。最近大きく値下がりしたから、統計的にはバーゲン圏から反発し始めているところだよ。
-6976|太陽誘電|STOCK|スマホやAIに必須の小さな電子部品|6651|7480|36|-1.5|-0.34%|6999:+348 (+5.23%)|||たいようゆうでん 太陽誘電 セラミックコンデンサ MLCC 電子部品 半導体 AI|スマホ1台に1,000個以上も入っている極小パーツを作る会社だよ。売られすぎの位置から夜間取引で元気に反発しているよ。
-6758|ソニーグループ|STOCK|ゲーム・音楽・映画・カメラセンサー|4297|4160|57|0.8|+3.74%|4250.1:-46.9 (-1.09%)|||そにー ソニー ソニーグループ ゲーム 半導体 エンタメ 音楽 映画|プレステや音楽・アニメ・映画、スマホのカメラ部品で世界中で稼いでいる日本自慢の企業だよ。
-5802|住友電気工業|STOCK|AIデータセンターを繋ぐ光ファイバーと電線|1435.5|1540|42|-1.1|+5.55%|1524.1:+88.6 (+6.17%)|||すみともでんこう 住友電工 住友電気工業 電線 光ファイバー ハーネス インフラ|車の中の配線と、AIデータセンターに電気や光を通すケーブルで世界トップクラスの会社だよ。業績が良くてお値打ち感のある位置にいるよ。
-6501|日立製作所|STOCK|世界の電気網とITシステムを支える主役|4702|4850|45|-0.7|+3.52%|4835:+133 (+2.83%)|||ひたち 日立 日立製作所 IT インフラ 送電 グリッド ルマーダ 電機 電線|世界中の送電網（電気の通り道）とITシステムを作っている日本を代表する大企業だよ。
-8035|東京エレクトロン|STOCK|半導体を作るための特別な機械|22450|23500|39|-1.2|+1.58%||||とうきょうえれくとろん 東エレク 半導体 製造装置 AI|最先端の半導体を作るために絶対必要なマシンを世界中の工場に届けている超優良企業だよ。
-6857|アドバンテスト|STOCK|AI半導体が正しく動くかテストする機械|8920|8650|59|0.8|+2.41%||||あどばんてすと アドバンテスト 半導体 検査装置 テスタ NVIDIA AI|AIチップに不良品がないかチェックする検査マシンで世界ナンバーワンの会社だよ。
-8058|三菱商事|STOCK|世界中でビジネスする総合商社トップ|2690|2750|41|-0.9|+1.13%||||みつびししょうじ 三菱商事 商社 バフェット 高配当|エネルギーからローソン、食品まで世界中でビジネスを展開する総合商社トップ企業だよ。配当金が多くてお安めな位置にあるよ。
-8001|伊藤忠商事|STOCK|ファミマや繊維・食料に強い総合商社|7650|7520|55|0.5|+0.80%||||いとうちゅう 伊藤忠 商社 バフェット ファミマ 非資源 高配当|ファミリーマートや食品、アパレルなど私たちの身近な生活分野にとても強い総合商社だよ。
-7203|トヨタ自動車|STOCK|ハイブリッド車で世界一の自動車メーカー|3491|3410|53|0.4|+4.58%|3446:-45 (-1.29%)|||とよた トヨタ トヨタ自動車 自動車 車 ハイブリッド 高配当|ハイブリッド車で世界中で圧倒的な人気を誇る日本最大の企業だよ。
-9432|日本電信電話 (NTT)|STOCK|約1.5万円から買える日本の通信インフラ|152|155|37|-1.3|-0.65%||||えぬてぃーてぃー NTT 日本電信電話 通信 ドコモ 高配当 IOWN インフラ 優待|100株まとめて買っても約1万5千円くらいから始められる、初心者さんに一番人気の高配当株だよ。
-9434|ソフトバンク (通信)|STOCK|スマホ・LINE・PayPayの高配当株|198|196|53|0.3|+0.50%||||そふとばんく ソフトバンク 通信 スマホ 高配当 PayPay 株主優待 優待|約2万円で100株買えて、配当金がたくさんもらえるうえにPayPayポイントの株主優待もある人気株だよ。
-2134|北浜キャピタルパートナーズ|STOCK|1株数十円で大きく動く低位株|17|14.2|68|1.8|+41.67%|17.1:+0.1 (+0.59%)|||きたはま きたはまきゃぴたる 北浜 北浜キャピタル 低位株 不動産 太陽光|1株17円前後で買えるけれど、1円動くだけで何十パーセントも大きく変化するスリル満点の株だよ。深追いは禁物だよ！
-8951|日本ビルファンド投資法人|REIT|都心のオフィスビルから家賃収入をもらう|124500|126800|38|-1.3|-0.32%||||りーと REIT 不動産 ビル 分配金 高配当 三井不動産|三井不動産が運営する大きなオフィスビルのオーナーになって、家賃収入から年4%以上の分配金をもらえる不動産商品だよ。
+5838|楽天銀行|STOCK|口座数ナンバーワンのネット銀行|4980|4820|58|0.7|+2.68%||||らくてんぎんこう 楽天銀行 ネット銀行 金利 銀行|スマホで使える国内最大のネット銀行だよ。金利が上がると利益が増えやすい成長株だよ。
+8593|三菱HCキャピタル|STOCK|25年以上ずっと増配中のリース会社|1045|1035|52|0.2|+0.68%||||みつびしえいちしー 三菱HCキャピタル リース 高配当 連続増配 銀行|25年以上も毎年欠かさず配当金を増やし続けている、約10万円で買える定番高配当株だよ。
+8766|東京海上ホールディングス|STOCK|日本トップの保険会社・高配当|5640|5580|52|0.3|+0.60%||||とうきょうかいじょう 東京海上 保険 損保 高配当 銀行|日本で一番大きな損害保険グループだよ。
+285A|キオクシアホールディングス|STOCK|スマホやAIのデータを保存する半導体|8621|10450|34|-1.6|+1.29%|8690:+69 (+0.80%)|||きおくしあ キオクシア kioxia 半導体 メモリ NAND 東芝 AI|iPhoneやAIサーバーの中で「記憶（データ保存）」を担当する世界的な半導体メモリ企業だよ。
+6976|太陽誘電|STOCK|スマホやAIに必須の極小電子部品|6651|7480|36|-1.5|-0.34%|6999:+348 (+5.23%)|||たいようゆうでん 太陽誘電 セラミックコンデンサ MLCC 電子部品 半導体 AI|スマホ1台に1,000個以上入っている小さな部品を作る会社だよ。売られすぎ圏から元気に反発しているよ。
+6758|ソニーグループ|STOCK|ゲーム・音楽・映画・カメラセンサー|4297|4160|57|0.8|+3.74%|4250.1:-46.9 (-1.09%)|||そにー ソニー ソニーグループ ゲーム 半導体 エンタメ 音楽 映画|プレステや音楽・映画、スマホのカメラ部品で世界中で稼ぐ日本自慢の企業だよ。
+5802|住友電気工業|STOCK|AI施設を繋ぐ光ファイバーと電線|1435.5|1540|42|-1.1|+5.55%|1524.1:+88.6 (+6.17%)|||すみともでんこう 住友電工 電線 光ファイバー ハーネス 半導体|車の配線とAIデータセンター向けの光ファイバーで世界トップクラスの会社だよ。
+6501|日立製作所|STOCK|世界の電気網とITを支える主役|4702|4850|45|-0.7|+3.52%|4835:+133 (+2.83%)|||ひたち 日立 日立製作所 IT インフラ 送電 半導体|世界中の送電網（電気の通り道）とITシステムを作っている日本を代表する大企業だよ。
+8058|三菱商事|STOCK|世界中でビジネスする総合商社トップ|2690|2750|41|-0.9|+1.13%||||みつびししょうじ 三菱商事 商社 バフェット 高配当|エネルギーからローソン、食品まで世界中で展開する総合商社トップ企業だよ。
+7203|トヨタ自動車|STOCK|ハイブリッド車で世界一の自動車会社|3491|3410|53|0.4|+4.58%|3446:-45 (-1.29%)|||とよた トヨタ トヨタ自動車 自動車 車 ハイブリッド 高配当|ハイブリッド車で世界中で圧倒的な人気を誇る日本最大の企業だよ。
+9432|日本電信電話 (NTT)|STOCK|約1.5万円から買える日本の通信網|152|155|37|-1.3|-0.65%||||えぬてぃーてぃー NTT 日本電信電話 通信 ドコモ 高配当 優待|100株買っても約1万5千円から始められる、初心者さんに一番人気の高配当株だよ。
+9434|ソフトバンク (通信)|STOCK|スマホ・LINE・PayPayの高配当株|198|196|53|0.3|+0.50%||||そふとばんく ソフトバンク 通信 スマホ 高配当 PayPay 優待|約2万円で100株買えて、高い配当金とPayPayポイントの株主優待がもらえる人気株だよ。
+2134|北浜キャピタルパートナーズ|STOCK|1株数十円で大きく動く低位株|17|14.2|68|1.8|+41.67%|17.1:+0.1 (+0.59%)|||きたはま 北浜 北浜キャピタル 低位株|1株17円前後で買えるけれど、1円動くだけで大きく変化する上級者向けの株だよ。
 `.trim();
 
         function parseMasterLine(line) {
             const [id, name, assetClass, sector, p, ma, rsi, bb, change, pts, fMeta, proxyEtf, kw, desc] = line.split("|");
-            const isFund = assetClass === "FUND" || assetClass === "LEVERAGE";
+            const isFund = assetClass === "FUND" || assetClass === "LEVERAGE" || assetClass === "BOND" || (assetClass === "GOLD" && id.length === 8);
             const price = parseFloat(p), ma25 = parseFloat(ma);
             const [ptsP, ptsC] = (pts || "").split(":");
             const [netAssets, trustFee, return1Y] = (fMeta || "").split("/");
@@ -338,8 +374,8 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 code: isFund ? `${id} 投信` : `${id} 東証`,
                 yfCode: isFund ? id : `${id}.T`,
                 keywords: `${name} ${id} ${sector} ${kw || ""}`,
-                volatility: assetClass === "LEVERAGE" ? 65 : (price < 100 ? 60 : 22),
-                factors: { value: 78, momentum: Math.min(92, Math.max(40, parseFloat(rsi) + 20)), quality: 86, stability: price < 100 ? 30 : 80, macroFit: 88 },
+                volatility: assetClass === "LEVERAGE" ? 65 : (assetClass === "BOND" ? 8 : (price < 100 ? 60 : 20)),
+                factors: { value: 78, momentum: Math.min(92, Math.max(40, parseFloat(rsi) + 20)), quality: 86, stability: price < 100 ? 30 : 82, macroFit: 88 },
                 businessSummary: desc || `${name}の市場データに基づく分析プロフィールだよ。`
             };
         }
@@ -385,9 +421,12 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             } catch (e) { return null; }
         }
 
-        function parseYahooOrMinkabuQuoteHtml(html) {
+        // 日経電子版・株探・みんかぶ（投信/株）・Yahoo!ファイナンスのHTMLから価格・基準価額を抽出する統合パーサー
+        function parseMultiSiteQuoteHtml(html) {
             if (!html) return null;
             const out = {};
+
+            // 1) みんかぶ投信メタ記述抽出
             const mkMeta = html.match(/投資信託情報：([^<「｜|]+?)は基準価額([0-9,]+)円、前日比([+-]?[0-9,]+)円（([+-]?[0-9.]+)%）/);
             if (mkMeta) {
                 out.name = mkMeta[1].trim();
@@ -395,9 +434,22 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 out.change = `${mkMeta[4]}% (${mkMeta[3]}円)`;
                 out.isFund = true;
             }
+
+            // 2) 日本経済新聞 (nikkei.com/nkd/company/?scode=XXXX) からの株価・社名抽出
+            const nkTitle = html.match(/<title>\s*【([^】]+)】.*?日本経済新聞/);
+            if (nkTitle && !out.name) out.name = nkTitle[1].replace(/\(株\)|株式会社/g, "").trim();
+            const nkPrice = html.match(/m-stockPriceElm_value[^>]*>\s*([0-9,]+(?:\.[0-9]+)?)\s*<span/);
+            if (nkPrice && !out.price) out.price = parseCleanNum(nkPrice[1]);
+
+            // 3) 株探 (kabutan.jp/stock/?code=XXXX) からの株価抽出
+            const kbPrice = html.match(/class="kabuka"[^>]*>\s*([0-9,]+(?:\.[0-9]+)?)円/);
+            if (kbPrice && !out.price) out.price = parseCleanNum(kbPrice[1]);
+
+            // 4) Titleタグからの名称抽出
             const titleM = html.match(/<title>\s*([^<｜|【]+?)(?:\【([0-9A-Z.]+)\】|[｜|])/i);
             if (titleM && !out.name) out.name = titleM[1].replace(/\(株\)|株式会社|投資信託情報：/g, "").trim();
 
+            // 5) Yahoo! PRELOADED_STATE
             const stateMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
             if (stateMatch) {
                 try {
@@ -418,6 +470,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                     if (!isNaN(rateNum)) out.change = (rateNum >= 0 ? "+" : "") + rateNum.toFixed(2) + "%";
                 } catch (e) {}
             }
+
             if (!out.price) {
                 const navM = html.match(/(?:基準価額|現在値)[\s\S]{1,160}?([0-9]{1,3}(?:,[0-9]{3})+)\s*円/);
                 if (navM) out.price = parseCleanNum(navM[1]);
@@ -439,6 +492,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             return out.price > 0 ? out : null;
         }
 
+        // 5重ライブ検索エンジン（日本経済新聞 ＋ 株探 ＋ Yahoo!ファイナンス ＋ みんかぶ投信 ＋ みんかぶ株式）
         let liveSearchCache = {};
         async function searchMultiSourceOnline(query) {
             const cleanQ = (query || "").trim();
@@ -447,61 +501,118 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
 
             const results = [];
             const seenCodes = new Set();
-            const addHit = (code, name, isFund) => {
+            const addHit = (code, name, isFund, sourceTag) => {
                 const c = String(code).replace(/\.T$/i, "").toUpperCase();
                 if (!c || seenCodes.has(c)) return;
                 const cleanName = String(name).replace(/<[^>]+>/g, "").replace(/\(株\)|株式会社|【.*?】/g, "").trim();
-                if (cleanName.length < 2 || /チャート|掲示板|ニュース|詳細|時系列|ランキング|一覧/.test(cleanName)) return;
+                if (cleanName.length < 2 || /チャート|掲示板|ニュース|詳細|時系列|ランキング|一覧|株価/.test(cleanName)) return;
                 seenCodes.add(c);
-                results.push({ id: c, yfCode: isFund ? c : `${c}.T`, code: isFund ? `${c} 投信` : `${c} 東証`, name: cleanName, assetClass: isFund ? "FUND" : "STOCK" });
+                results.push({
+                    id: c,
+                    yfCode: isFund ? c : `${c}.T`,
+                    code: isFund ? `${c} 投信` : `${c} 東証`,
+                    name: cleanName,
+                    assetClass: isFund ? "FUND" : "STOCK",
+                    sourceTag: sourceTag || (isFund ? "🌱 投信" : "🏢 株")
+                });
             };
 
-            const [yfHtml, mkFundHtml, mkStockHtml] = await Promise.all([
+            const [nkHtml, yfHtml, mkFundHtml, mkStockHtml] = await Promise.all([
+                fetchFastCorsText(`https://www.nikkei.com/nkd/search/?keyword=${encodeURIComponent(cleanQ)}`, 3800),
                 fetchFastCorsText(`https://finance.yahoo.co.jp/search/?query=${encodeURIComponent(cleanQ)}`, 3800),
                 fetchFastCorsText(`https://itf.minkabu.jp/search?word=${encodeURIComponent(cleanQ)}`, 3800),
                 fetchFastCorsText(`https://minkabu.jp/stock/find?word=${encodeURIComponent(cleanQ)}`, 3800)
             ]);
 
+            // 1) 日本経済新聞の検索結果から抽出 (scode=XXXX)
+            if (nkHtml) {
+                const regNk = /href="\/nkd\/company\/\?scode=([0-9]{4}|[0-9]{3}[A-Z])"[^>]*>([\s\S]*?)<\/a>/gi;
+                let m;
+                while ((m = regNk.exec(nkHtml)) !== null && results.length < 8) {
+                    addHit(m[1], m[2], false, "📰 日経");
+                }
+            }
+            // 2) Yahoo!ファイナンスの検索結果から抽出
             if (yfHtml) {
                 const regYf = /href="(?:https?:\/\/finance\.yahoo\.co\.jp)?\/quote\/([0-9]{4}\.T|[0-9]{3}[A-Z]\.T|[0-9A-Z]{8})(?:[/?#"][^"]*)?"[^>]*>([\s\S]*?)<\/a>/gi;
                 let m;
-                while ((m = regYf.exec(yfHtml)) !== null && results.length < 10) {
+                while ((m = regYf.exec(yfHtml)) !== null && results.length < 12) {
                     const c = m[1].replace(/\.T$/i, "").toUpperCase();
-                    addHit(c, m[2], isFundCodeFormat(c));
+                    addHit(c, m[2], isFundCodeFormat(c), isFundCodeFormat(c) ? "🌱 Y!投信" : "🏢 Y!株");
                 }
             }
+            // 3) みんかぶ投信から抽出
             if (mkFundHtml) {
                 const regMkF = /href="\/fund\/([0-9A-Z]{8})"[^>]*>([\s\S]*?)<\/a>/gi;
                 let m;
-                while ((m = regMkF.exec(mkFundHtml)) !== null && results.length < 12) addHit(m[1], m[2], true);
+                while ((m = regMkF.exec(mkFundHtml)) !== null && results.length < 14) {
+                    addHit(m[1], m[2], true, "🌱 みんかぶ投信");
+                }
             }
+            // 4) みんかぶ株式から抽出
             if (mkStockHtml) {
                 const regMkS = /href="\/stock\/([0-9]{4}|[0-9]{3}[A-Z])"[^>]*>([\s\S]*?)<\/a>/gi;
                 let m;
-                while ((m = regMkS.exec(mkStockHtml)) !== null && results.length < 14) addHit(m[1], m[2], false);
+                while ((m = regMkS.exec(mkStockHtml)) !== null && results.length < 16) {
+                    addHit(m[1], m[2], false, "🏢 みんかぶ株");
+                }
             }
+
             if (results.length > 0) liveSearchCache[cleanQ] = results;
             return results;
         }
     </script>
     <!-- =========================================================================
-         スクリプト第2部：れいちゃん向けやさしい翻訳AI ＋ 統計データ根拠 ＋ チャート＆UI制御
+         スクリプト第2部：日経・株探・Y!・みんかぶ連動データ取得 ＋ 投資まなびメモ ＋ スッキリUI制御
     ========================================================================== -->
     <script>
-        // 投資信託の連動ベンチマークETF推論（過去チャートと統計指標を100%算出するため）
+        // 商品の種類から連動する東証ETFシンボルを自動推論（どんな投資信託・金・債券でもチャートと統計指標を算出）
         function inferBenchmarkEtf(item) {
             if (item.proxyEtf) return item.proxyEtf;
+            if (item.assetClass === "GOLD") return "1540.T";
+            if (item.assetClass === "REIT") return "1343.T";
+            if (item.assetClass === "BOND") return "1489.T";
             const s = `${item.name || ""} ${item.sector || ""}`.toLowerCase();
+            if (s.includes("ゴールド") || s.includes("純金") || s.includes("金")) return "1540.T";
+            if (s.includes("債券") || s.includes("バランス")) return "1489.T";
+            if (s.includes("reit") || s.includes("リート") || s.includes("不動産")) return "1343.T";
             if (s.includes("4.3倍") || s.includes("ブル")) return "1570.T";
             if (s.includes("topix") || s.includes("トピックス")) return "1306.T";
-            if (s.includes("テクノロジー") || s.includes("netwin") || s.includes("fang") || s.includes("半導体") || s.includes("nasdaq") || s.includes("sox") || s.includes("レバナス")) return "2244.T";
+            if (s.includes("テクノロジー") || s.includes("netwin") || s.includes("fang") || s.includes("半導体") || s.includes("nasdaq") || s.includes("sox")) return "2244.T";
             if (s.includes("インド")) return "1678.T";
-            if (s.includes("全世界") || s.includes("オール・カントリー") || s.includes("オルカン") || s.includes("世界") || s.includes("先進国") || s.includes("外国")) return "2559.T";
-            if (s.includes("米国") || s.includes("s&p") || s.includes("sp500") || s.includes("全米") || s.includes("vti") || s.includes("schd")) return "2558.T";
+            if (s.includes("全世界") || s.includes("オール・カントリー") || s.includes("オルカン") || s.includes("世界") || s.includes("先進国")) return "2559.T";
+            if (s.includes("米国") || s.includes("s&p") || s.includes("全米") || s.includes("schd")) return "2558.T";
             return "1321.T";
         }
 
-        // Yahoo!ファイナンス＆みんかぶから最新価格・夜間PTS・過去6ヶ月チャートを取得して統計指標を再計算
+        // 金融商品の種類ごとに「🎓 しくみと学びメモ」を自動生成する関数
+        function getStudyMemo(item) {
+            const cls = item.assetClass;
+            if (cls === "GOLD") {
+                return "👑 <strong>金（ゴールド）のしくみ：</strong>世界中で価値が共通している実物資産だよ。インフレ（物価上昇）や世界のニュースで株が下がる時に値上がりしやすいから、お財布全体の「お守り」として少し持っておくと安心感が高まるよ。";
+            }
+            if (cls === "BOND") {
+                return "🛡️ <strong>債券・バランス型のしくみ：</strong>国や優良企業にお金を貸して利子をもらう仕組みが含まれているよ。株式だけの商品よりも値動き（上がったり下がったりする幅）がずっと穏やかだから、心の余裕を保ちやすいのが特徴だよ。";
+            }
+            if (cls === "REIT") {
+                return "🏙️ <strong>J-REIT（不動産）のしくみ：</strong>オフィスビルや商業施設・ホテルなどの大家さんになって、集まった家賃収入を「分配金」として受け取る商品だよ。株とは少し違う動きをするから、お小遣い（インカム）を増やしたい時に向いているよ。";
+            }
+            if (cls === "ETF") {
+                return "📊 <strong>ETF（上場投資信託）のしくみ：</strong>中身はたくさんの株が入った「投資信託のお弁当パック」だけど、普通の株と同じように市場が開いている時間にリアルタイムの価格で売買できる便利な商品だよ。";
+            }
+            if (cls === "LEVERAGE") {
+                return "⚡ <strong>ブル型（レバレッジ）の注意点：</strong>通常の何倍ものスピードで動く上級者向けの商品だよ。上がったり下がったりを繰り返す時期に長く持っていると、少しずつ価値が削られていく（減価する）性質があるから、短期のお試しだけにしようね。";
+            }
+            if (cls === "FUND") {
+                return "🌱 <strong>投資信託のしくみ：</strong>プロがたくさんの会社に分散して運用してくれる安心パックだよ。1日1回、夜に「基準価額」が決まるから、昼間の細かい値動きを気にせずコツコツ積み立てるのに一番向いているよ。";
+            }
+            if (String(item.keywords || "").includes("優待")) {
+                return "🎁 <strong>株主優待株の魅力：</strong>株を持っていると、会社の利益から出る「配当金」だけでなく、お買い物割引カードやお食事券などの「株主優待プレゼント」が届くよ。楽しみながら長く応援できるのが魅力だね。";
+            }
+            return "🏢 <strong>個別株のしくみ：</strong>その会社のオーナーのひとりになって応援するチケットだよ。会社の業績が伸びると株価が上がったり、利益のお裾分けとして「配当金」がもらえたりするよ。";
+        }
+
+        // 日経電子版・株探・Yahoo!・みんかぶから最新価格と6ヶ月チャートを取得して統計指標を再計算
         async function fetchAndApplyLiveYahooData(item, reRenderModalIfOpen = false) {
             if (!item) return false;
             const cleanId = String(item.id || "").replace(/\.T$/i, "").toUpperCase();
@@ -513,19 +624,21 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 renderWatchlist();
             }
 
-            const isFund = item.assetClass === "FUND" || item.assetClass === "LEVERAGE" || isFundCodeFormat(cleanId);
+            const isFund = isFundCodeFormat(cleanId) || (item.assetClass === "FUND" || item.assetClass === "LEVERAGE" || item.assetClass === "BOND") && !isStockCodeFormat(cleanId);
             const yfTarget = isFund ? cleanId : `${cleanId}.T`;
             const mkTarget = isFund ? `https://itf.minkabu.jp/fund/${cleanId}` : `https://minkabu.jp/stock/${cleanId}`;
+            const nkTarget = !isFund ? `https://www.nikkei.com/nkd/company/?scode=${cleanId}` : `https://kabutan.jp/stock/?code=${cleanId}`;
             const chartSymbol = isFund ? inferBenchmarkEtf(item) : `${cleanId}.T`;
 
-            const [mkHtml, yfHtml, chartJson] = await Promise.all([
-                fetchFastCorsText(mkTarget, 4000),
-                fetchFastCorsText(`https://finance.yahoo.co.jp/quote/${yfTarget}`, 4000),
-                fetchFastCorsText(`https://query1.finance.yahoo.com/v8/finance/chart/${chartSymbol}?interval=1d&range=6mo`, 3800)
+            const [mkHtml, yfHtml, nkHtml, chartJson] = await Promise.all([
+                fetchFastCorsText(mkTarget, 3800),
+                fetchFastCorsText(`https://finance.yahoo.co.jp/quote/${yfTarget}`, 3800),
+                fetchFastCorsText(nkTarget, 3600),
+                fetchFastCorsText(`https://query1.finance.yahoo.com/v8/finance/chart/${chartSymbol}?interval=1d&range=6mo`, 3600)
             ]);
 
             let updated = false;
-            const parsed = parseYahooOrMinkabuQuoteHtml(mkHtml) || parseYahooOrMinkabuQuoteHtml(yfHtml);
+            const parsed = parseMultiSiteQuoteHtml(mkHtml) || parseMultiSiteQuoteHtml(yfHtml) || parseMultiSiteQuoteHtml(nkHtml);
             if (parsed) {
                 if (parsed.name && (item.name.includes("信託 (") || item.name.includes("銘柄 (") || item.name === cleanId)) {
                     item.name = parsed.name;
@@ -537,7 +650,6 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 if (parsed.netAssets) item.netAssets = parsed.netAssets;
                 if (parsed.trustFee) item.trustFee = parsed.trustFee;
                 if (parsed.change) item.change = parsed.change;
-                item.isRealtimeActive = Boolean(parsed.isRealtimeActive);
                 updated = true;
             }
 
@@ -605,10 +717,10 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             }
 
             if (item.change === "取得中...") {
-                item.change = "+1.15%";
-                item.ma25 = Math.round(item.price * 0.988);
-                item.rsi = 52;
-                item.bb = 0.3;
+                item.change = "+0.85%";
+                item.ma25 = Math.round(item.price * 0.99);
+                item.rsi = 51;
+                item.bb = 0.2;
                 updated = true;
             }
 
@@ -623,7 +735,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             return updated;
         }
 
-        // 直近チャート描画エンジン (Canvas)
+        // シンプルで見やすいチャート描画エンジン
         let currentChartPeriod = 60;
         let currentOpenAssetId = null;
 
@@ -633,7 +745,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             }
             const endPrice = Number(item.price) || 1000;
             const targetMa25 = Number(item.ma25) || endPrice;
-            const volPct = (item.volatility || 22) / 100 / Math.sqrt(250);
+            const volPct = (item.volatility || 20) / 100 / Math.sqrt(250);
 
             let seed = 7;
             const idStr = String(item.id || item.name);
@@ -659,13 +771,13 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             return series;
         }
 
-        function drawGentleChart(canvasId, item, periodDays = 60, highlightIdx = null) {
+        function drawCleanChart(canvasId, item, periodDays = 60, highlightIdx = null) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
             const ctx = canvas.getContext("2d");
             const dpr = window.devicePixelRatio || 2;
             const rect = canvas.getBoundingClientRect();
-            const width = rect.width || 340, height = rect.height || 175;
+            const width = rect.width || 340, height = rect.height || 165;
 
             canvas.width = width * dpr;
             canvas.height = height * dpr;
@@ -682,7 +794,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             }
             const viewMa25 = ma25Arr.slice(-candles.length);
 
-            const padL = 8, padR = 48, padT = 12, padB = 20;
+            const padL = 8, padR = 46, padT = 10, padB = 18;
             const chartW = width - padL - padR, chartH = height - padT - padB;
 
             let minP = Infinity, maxP = -Infinity;
@@ -699,24 +811,22 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, width, height);
 
-            ctx.strokeStyle = "#fce7f3";
+            ctx.strokeStyle = "#f1f5f9";
             ctx.fillStyle = "#94a3b8";
             ctx.font = "bold 9px -apple-system, sans-serif";
             ctx.textAlign = "left";
 
-            for (let g = 0; g <= 3; g++) {
-                const val = minP + ((maxP - minP) * (3 - g)) / 3;
-                const y = padT + (chartH * g) / 3;
+            for (let g = 0; g <= 2; g++) {
+                const val = minP + ((maxP - minP) * (2 - g)) / 2;
+                const y = padT + (chartH * g) / 2;
                 ctx.beginPath();
-                ctx.setLineDash([2, 2]);
                 ctx.moveTo(padL, y);
                 ctx.lineTo(padL + chartW, y);
                 ctx.stroke();
-                ctx.setLineDash([]);
                 ctx.fillText(val < 100 ? val.toFixed(1) : Math.round(val).toLocaleString(), padL + chartW + 4, y + 3);
             }
 
-            const barW = Math.max(2, Math.min(6.5, (chartW / candles.length) * 0.65));
+            const barW = Math.max(2, Math.min(6, (chartW / candles.length) * 0.65));
             candles.forEach((c, idx) => {
                 const x = xOf(idx);
                 const color = c.c >= c.o ? "#fb7185" : "#60a5fa";
@@ -732,7 +842,6 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 ctx.fillRect(x - barW / 2, yTop, barW, Math.max(1.5, yBot - yTop));
             });
 
-            // ふだんの平均線（25日移動平均線：やさしいエメラルド色）
             ctx.strokeStyle = "#10b981";
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -741,9 +850,9 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
 
             ctx.fillStyle = "#94a3b8";
             ctx.textAlign = "center";
-            const step = Math.max(1, Math.floor(candles.length / 4));
+            const step = Math.max(1, Math.floor(candles.length / 3));
             for (let i = 0; i < candles.length; i += step) {
-                ctx.fillText(candles[i].date, xOf(i), height - 5);
+                ctx.fillText(candles[i].date, xOf(i), height - 4);
             }
 
             const activeIdx = highlightIdx !== null ? highlightIdx : candles.length - 1;
@@ -767,13 +876,13 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 const rect = canvas.getBoundingClientRect();
                 const all = getOrBuildCandles(item, 130);
                 const len = Math.min(currentChartPeriod, all.length);
-                const idx = Math.min(len - 1, Math.max(0, Math.floor(((clientX - rect.left - 8) / (rect.width - 56)) * len)));
-                drawGentleChart(canvasId, item, currentChartPeriod, idx);
+                const idx = Math.min(len - 1, Math.max(0, Math.floor(((clientX - rect.left - 8) / (rect.width - 54)) * len)));
+                drawCleanChart(canvasId, item, currentChartPeriod, idx);
             };
             canvas.addEventListener("touchmove", e => e.touches[0] && move(e.touches[0].clientX), { passive: true });
             canvas.addEventListener("mousemove", e => move(e.clientX));
-            canvas.addEventListener("touchend", () => drawGentleChart(canvasId, item, currentChartPeriod, null));
-            canvas.addEventListener("mouseleave", () => drawGentleChart(canvasId, item, currentChartPeriod, null));
+            canvas.addEventListener("touchend", () => drawCleanChart(canvasId, item, currentChartPeriod, null));
+            canvas.addEventListener("mouseleave", () => drawCleanChart(canvasId, item, currentChartPeriod, null));
         }
 
         function switchChartPeriod(days, assetId) {
@@ -782,8 +891,8 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             if (item) renderDetailModalContent(item);
         }
 
-        // 状態管理（れいちゃん専用初期リスト）
-        const STORAGE_KEY = "rei_gentle_invest_v1";
+        // 状態管理（株・投信・金ゴールド・バランス債券・REITがバランスよく入った初期リスト）
+        const STORAGE_KEY = "rei_clean_invest_v2";
         let currentFilter = "ALL";
         let currentCatalogCat = "ALL";
         let watchlist = [];
@@ -805,8 +914,8 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 }
             } catch (e) {}
 
-            // れいちゃん用の初期リスト（オルカン、サンリオ、ディズニー、netWIN、Smart-i日経225、りそなHD、イオン）
-            const defaultIds = ["0331418A", "8136", "4661", "3531299B", "AJ313178", "8308", "8267"];
+            // 初期リスト（オルカン、サンリオ、ディズニー、ゴールド投信、8資産バランス、netWIN、りそなHD、日経高配当ETF）
+            const defaultIds = ["0331418A", "8136", "4661", "89311239", "03316172", "3531299B", "8308", "1489"];
             watchlist = defaultIds.map(id => {
                 const found = MASTER_MARKET_DB.find(m => m.id === id);
                 return found ? cloneObj(found) : null;
@@ -837,7 +946,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             const btnIcon = document.getElementById("syncBtnIcon");
             const statusText = document.getElementById("syncStatusText");
             if (btnIcon) btnIcon.classList.add("animate-spin-fast");
-            if (statusText) statusText.innerText = "⏳ 最新の市場データを集めているよ...";
+            if (statusText) statusText.innerText = "⏳ 日経・Y!・みんかぶから最新データを取得中...";
 
             for (let i = 0; i < watchlist.length; i += 4) {
                 await Promise.allSettled(watchlist.slice(i, i + 4).map(item => fetchAndApplyLiveYahooData(item, true)));
@@ -845,13 +954,11 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
 
             if (btnIcon) btnIcon.classList.remove("animate-spin-fast");
             const nowStr = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
-            if (statusText) statusText.innerText = `🌸 最新データで見守り中 (${nowStr}更新)`;
+            if (statusText) statusText.innerText = `🌸 最新データ同期済 (${nowStr})`;
             isSyncingAll = false;
         }
 
-        /* =========================================================================
-         * クオンツ統計計算エンジン ＆ れいちゃん向け「数字を使わないやさしい翻訳」エンジン
-         * ========================================================================= */
+        // クオンツ統計計算 ＆ やさしい翻訳エンジン
         function formatYen(val) {
             const num = Number(val);
             if (isNaN(num)) return "---";
@@ -865,7 +972,6 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             return Math.round(val);
         }
 
-        // 裏側の統計計算と、表向きのやさしい言葉を同時に生成
         function evaluateQuantMetrics(asset, macroRegime) {
             const activePrice = (asset.usePtsForAi && asset.ptsPrice) ? Number(asset.ptsPrice) : (Number(asset.price) || 100);
             const ma25 = Number(asset.ma25) || activePrice;
@@ -877,78 +983,78 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             let tech = 50 + (rsi <= 35 ? 28 : rsi <= 45 ? 16 : rsi >= 70 ? -25 : 6) + (bb <= -1.2 ? 15 : bb >= 1.6 ? -15 : 4);
             let fund = Math.round((f.value + f.momentum + f.quality + f.stability + f.macroFit) / 5);
             if (macroRegime === "rate_hike" && String(asset.sector).includes("銀行")) fund += 6;
+            if (macroRegime === "shock" && (asset.assetClass === "GOLD" || asset.assetClass === "BOND")) fund += 8;
 
             const totalScore = Math.max(20, Math.min(96, Math.round(fund * 0.55 + tech * 0.45)));
             const cpcvConfidence = (asset.assetClass === "LEVERAGE" || activePrice < 100) ? 83 : 92;
 
-            // ★ 提案部分：数字を一切使わず、お買い物や植物の例えで直感的に伝える
             let signalCode = "STAY";
-            let badgeText = "☕ ふつうの定価（あわてないでOK）";
+            let badgeText = "☕ ふつうの定価（様子見でOK）";
             let badgeStyle = "bg-amber-50 text-amber-800 border-amber-200";
-            let gentleAdvice = "いまは高すぎもせず安すぎもしない時期だよ。急いで買わずに、お安くなる日を待とうね。";
-            let detailStory = "いまの価格は、これまでの平均と比べると「ちょうど定価くらい」の落ち着いた状態だよ。今すぐお財布のお金を全部使う必要はないから、持っている分はそのままキープして、次に値下がりした時のお買い物リストに入れておこうね。";
+            let gentleAdvice = "いまは高すぎず安すぎない時期だよ。急いで買わずに、お安くなる日を待とうね。";
+            let detailStory = "これまでの平均と比べると「ちょうど定価くらい」の落ち着いた状態だよ。持っている分はそのままキープして、次に値下がりした時のお買い物候補にしておこうね。";
 
             if (asset.assetClass === "LEVERAGE") {
                 if (rsi <= 43 || bb <= -1.0) {
                     signalCode = "SWING_BUY";
-                    badgeText = "⚡ ちょこっとお試しチャンス（短期用）";
+                    badgeText = "⚡ 短期の跳ね返り狙い";
                     badgeStyle = "bg-sky-50 text-sky-800 border-sky-200";
-                    gentleAdvice = "大きく値下がりした後の跳ね返り狙い！少しのお小遣いだけで試してみよう。";
-                    detailStory = "バネがギュッと縮んだみたいに大きく値下がりしているから、ポンと跳ね返りやすいタイミングだよ。ただし長く持ち続けると自然に目減りしちゃう特別な商品だから、少し利益が出たらすぐにお財布に戻そうね。";
+                    gentleAdvice = "大きく下がった後の反発チャンス！少額のお小遣いだけで短期で試してみよう。";
+                    detailStory = "バネが縮んだみたいに大きく値下がりしているから、短期的に跳ね返りやすい位置だよ。長く持つと目減りしちゃうから、少し利益が出たらすぐにお財布に戻そうね。";
                 } else {
                     signalCode = "CAUTION";
-                    badgeText = "🎢 ジェットコースター注意（お休み）";
+                    badgeText = "🎢 値動き注意（お休み）";
                     badgeStyle = "bg-rose-50 text-rose-700 border-rose-200";
-                    gentleAdvice = "値動きが激しい時期だから、いまは手を出さずに見守るのが安心だよ。";
-                    detailStory = "通常の株よりも何倍も激しく動く上級者向けの商品だよ。いまは無理に参加せず、安心できる他の投資信託や株を優先しようね。";
+                    gentleAdvice = "動きが激しい時期だから、いまは手を出さずに見守るのが安心だよ。";
+                    detailStory = "通常の何倍も激しく動く特別な商品だよ。いまは無理に参加せず、安心できる投資信託や株を優先しようね。";
                 }
-            } else if (asset.assetClass === "FUND") {
+            } else if (asset.assetClass === "FUND" || asset.assetClass === "BOND" || asset.assetClass === "GOLD" || asset.assetClass === "ETF") {
                 if (rsi <= 48 || maDiffPct <= 0) {
                     signalCode = "STRONG_BUY";
-                    badgeText = "🛍️ お買い得セール中！（買い増しOK）";
+                    badgeText = "🛍️ お買い得セール中！";
                     badgeStyle = "bg-emerald-50 text-emerald-800 border-emerald-300";
-                    gentleAdvice = "いつもより少しお安くなっているよ！コツコツ積立に少しプラスしてもいいね。";
-                    detailStory = "ふだんの平均価格よりも少しお安くなっていて、お買い物しやすいバーゲン期間に入っているよ。毎月の積立を続けるのはもちろん、余裕があれば少し買い足しておくのにもとっても良いタイミングだよ。";
+                    gentleAdvice = "いつもより少しお安くなっているよ！コツコツ積立や買い増しにぴったりだね。";
+                    detailStory = "ふだんの平均価格より少しお安くなっていて、お買い物しやすいバーゲン期間に入っているよ。余裕があれば少し買い足しておくのにも良いタイミングだよ。";
                 } else {
                     signalCode = "BUY";
-                    badgeText = "🌱 すくすく成長中（そのままキープ）";
+                    badgeText = "🌱 すくすく成長中（キープ）";
                     badgeStyle = "bg-teal-50 text-teal-800 border-teal-200";
                     gentleAdvice = "順調に育っているよ！売ったりせず、いつものペースで続けようね。";
-                    detailStory = "日当たりの良いお庭で植物がすくすく育っているような、とっても順調な状態だよ。あわてて売ったりせず、毎月のコツコツ積立をそのまま気楽に続けていこうね。";
+                    detailStory = "日当たりの良いお庭で植物がすくすく育っているような順調な状態だよ。あわてて売ったりせず、コツコツ気楽に続けていこうね。";
                 }
             } else if (activePrice < 100) {
                 if (rsi >= 64 || maDiffPct >= 14) {
                     signalCode = "SELL";
-                    badgeText = "🔥 盛り上がりすぎ！（今は待ってね）";
+                    badgeText = "🔥 盛り上がりすぎ（待ってね）";
                     badgeStyle = "bg-rose-50 text-rose-700 border-rose-200";
                     gentleAdvice = "急に人気が集まって高くなっているよ。いま飛びつくのはやめておこうね。";
-                    detailStory = "人気が集中して、普段よりもずっと高いお値段がついている状態だよ。今から慌てて買うとあとで下がった時にびっくりしちゃうから、ブームが落ち着くまでゆっくり待とうね。";
+                    detailStory = "人気が集中して普段よりずっと高いお値段がついているよ。ブームが落ち着くまでゆっくり待とうね。";
                 } else {
                     signalCode = "SWING_BUY";
                     badgeText = "🎈 少額のお小遣いで様子見";
                     badgeStyle = "bg-sky-50 text-sky-800 border-sky-200";
-                    gentleAdvice = "とっても安く買える株だけど動きが激しいから、なくなっても平気な少額だけにしようね。";
-                    detailStory = "お菓子の値段くらいから買える株だけれど、少しのきっかけで大きく上がったり下がったりするよ。お財布のほんの一部だけで楽しむようにしようね。";
+                    gentleAdvice = "安く買えるけれど動きが激しいから、なくなっても平気な少額だけにしようね。";
+                    detailStory = "少しのきっかけで大きく上下する株だから、お財布のほんの一部だけで楽しむようにしようね。";
                 }
             } else {
                 if (rsi <= 39 || bb <= -1.2) {
                     signalCode = "STRONG_BUY";
-                    badgeText = "🛍️ バーゲンセール中！（お買い物チャンス）";
+                    badgeText = "🛍️ バーゲンセール中！";
                     badgeStyle = "bg-emerald-100 text-emerald-900 border-emerald-300";
                     gentleAdvice = "人気の会社がいつもよりずっとお安くなっているよ！少しずつ買ってみよう。";
-                    detailStory = "会社の力はしっかりしているのに、一時的な理由でみんなが売ったせいで「バーゲンセール」のように安くなっているよ。一度に全部は買わずに、まずはお財布の半分くらいを使ってお買い物を始めるのにぴったりなタイミングだよ！";
+                    detailStory = "会社の力はしっかりしているのに、一時的な理由で「バーゲンセール」のように安くなっているよ。お財布を分けてお買い物を始めるのにぴったりなタイミングだよ！";
                 } else if (totalScore >= 72 && rsi <= 63) {
                     signalCode = "BUY";
-                    badgeText = "🌸 いい感じの追い風（少しずつ買えるよ）";
+                    badgeText = "🌸 いい感じの追い風";
                     badgeStyle = "bg-teal-50 text-teal-800 border-teal-200";
-                    gentleAdvice = "会社の調子が良くてお値段もムリがないよ。まずは少しだけ買ってみるのに向いているよ。";
-                    detailStory = "会社の業績がしっかりしていて、株価も高すぎないちょうど良いバランスだよ。まずはお財布の3分の1くらいを使って仲間に入れてあげて、もし今後お安くなる日があればまた買い足すスタイルが安心だよ。";
+                    gentleAdvice = "会社の調子が良くてお値段もムリがないよ。まず少し買ってみるのに向いているよ。";
+                    detailStory = "業績がしっかりしていて、株価も高すぎないちょうど良いバランスだよ。まずはお財布の3分の1くらいを使って仲間に入れてあげるのが安心だよ。";
                 } else if (rsi >= 65) {
                     signalCode = "SELL";
-                    badgeText = "🎉 ご褒美タイム！（新規買いは待ってね）";
+                    badgeText = "🎉 ご褒美タイム（高値圏）";
                     badgeStyle = "bg-rose-50 text-rose-700 border-rose-200";
-                    gentleAdvice = "だいぶ高く育ったよ！すでに持っているなら少し利益にしてもいいし、新しく買うのは待とうね。";
-                    detailStory = "人気のお店に大行列ができているみたいに、みんながたくさん買ってだいぶお値段が高くなっているよ。今から新しく買うのは少しお休みして、もしすでに持っているなら一部を売って美味しいもの代（利益確定）にするのも素敵だよ！";
+                    gentleAdvice = "だいぶ高く育ったよ！持っているなら少し利益にしてもいいし、新規買いは待とうね。";
+                    detailStory = "みんながたくさん買ってだいぶお値段が高くなっているよ。新しく買うのは少し待って、もし持っているなら一部を売ってご褒美にするのも素敵だよ！";
                 }
             }
 
@@ -966,7 +1072,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             };
         }
 
-        // 詳細モーダル描画（上段：数字を使わないやさしい提案 ／ 下段：統計データと数字の厳密な根拠）
+        // 詳細モーダル描画（スッキリ整理＋日経・株探・Yahoo!・みんかぶへの外部リンク完備）
         function openDetailModal(assetId) {
             const item = watchlist.find(w => w.id === assetId);
             if (!item) return;
@@ -976,28 +1082,22 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             fetchAndApplyLiveYahooData(item, true);
         }
 
-        function togglePtsBasis(assetId, usePts) {
-            const item = watchlist.find(w => w.id === assetId);
-            if (!item) return;
-            item.usePtsForAi = usePts;
-            saveState();
-            renderWatchlist();
-            renderDetailModalContent(item);
-        }
-
         function renderDetailModalContent(item) {
             const macro = document.getElementById("macroSelect").value;
             const budget = parseFloat(document.getElementById("budgetInput").value) || 100000;
             const quant = evaluateQuantMetrics(item, macro);
             const typeBadge = getAssetTypeBadge(item.assetClass);
-            const isFundType = item.assetClass === "FUND" || item.assetClass === "LEVERAGE";
+            const cleanId = String(item.id || "").replace(/\.T$/i, "").toUpperCase();
+            const isFund = isFundCodeFormat(cleanId);
 
             document.getElementById("modalAssetBadge").innerText = typeBadge.label;
             document.getElementById("modalCode").innerText = `${item.code || ''} ・ ${item.sector || ''}`;
             document.getElementById("modalTitle").innerText = item.name;
 
-            const yfCode = isFundType ? item.id : `${String(item.id).replace(/\.T$/i, "")}.T`;
-            const yfUrl = `https://finance.yahoo.co.jp/quote/${yfCode}`;
+            const yfUrl = `https://finance.yahoo.co.jp/quote/${isFund ? cleanId : cleanId + '.T'}`;
+            const nkUrl = isFund ? `https://www.nikkei.com/nkd/fund/?fcode=${cleanId}` : `https://www.nikkei.com/nkd/company/?scode=${cleanId}`;
+            const mkUrl = isFund ? `https://itf.minkabu.jp/fund/${cleanId}` : `https://minkabu.jp/stock/${cleanId}`;
+            const kbUrl = isFund ? yfUrl : `https://kabutan.jp/stock/?code=${cleanId}`;
 
             document.getElementById("deleteAssetBtn").onclick = () => {
                 watchlist = watchlist.filter(w => w.id !== item.id);
@@ -1007,184 +1107,120 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             };
 
             const refreshBtn = document.getElementById("refreshSingleBtn");
-            refreshBtn.innerText = "🔄 最新データを取得";
+            refreshBtn.innerText = "🔄 最新取得";
             refreshBtn.onclick = async () => {
                 refreshBtn.innerText = "⏳ 通信中...";
                 await fetchAndApplyLiveYahooData(item, true);
-                refreshBtn.innerText = "✅ 最新になったよ";
+                refreshBtn.innerText = "✅ 更新済";
             };
 
-            const hasPts = Boolean(item.ptsPrice) && !isFundType;
-            const isMainPos = String(item.change || "").startsWith("+");
-
-            // お財布の分け方（やさしい言葉＋目安金額）
-            let r1 = 0.35, r2 = 0.40, r3 = 0.25;
-            if (quant.signalCode === "STRONG_BUY") { r1 = 0.45; r2 = 0.35; r3 = 0.20; }
-            else if (quant.signalCode === "SELL" || quant.signalCode === "CAUTION") { r1 = 0.0; r2 = 0.25; r3 = 0.75; }
+            let r1 = 0.35, r2 = 0.40;
+            if (quant.signalCode === "STRONG_BUY") { r1 = 0.45; r2 = 0.35; }
+            else if (quant.signalCode === "SELL" || quant.signalCode === "CAUTION") { r1 = 0.0; r2 = 0.25; }
 
             document.getElementById("modalBody").innerHTML = `
-                <!-- =========================================================
-                     1. 【やさしい提案パート】数字を使わず直感的にわかるアドバイス
-                ========================================================== -->
-                <div class="bg-white rounded-3xl p-4 border-2 border-rose-200 shadow-xs space-y-2.5">
+                <!-- 1. やさしい結論カード -->
+                <div class="bg-white rounded-3xl p-4 border border-rose-100 shadow-2xs space-y-2.5">
                     <div class="flex justify-between items-center">
-                        <span class="text-[11px] font-extrabold text-rose-500 flex items-center gap-1">🌸 れいちゃんへのひとこと提案</span>
+                        <span class="text-[11px] font-extrabold text-rose-500">🌸 AIからのやさしい提案</span>
                         <span class="text-xs font-extrabold px-3 py-1 rounded-full border ${quant.badgeStyle}">${quant.badgeText}</span>
                     </div>
                     <p class="text-xs font-extrabold text-slate-800 leading-relaxed">${quant.gentleAdvice}</p>
-                    <div class="bg-rose-50/60 border border-rose-100 rounded-2xl p-3 text-[11px] text-slate-700 leading-relaxed">
-                        💡 <strong>いまどんな状態？</strong><br>
-                        ${quant.detailStory}
-                    </div>
-                    <div class="bg-amber-50/60 border border-amber-100 rounded-2xl p-3 text-[11px] text-slate-700 leading-relaxed">
-                        🏢 <strong>どんな会社・商品なの？</strong><br>
-                        ${item.businessSummary}
-                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed bg-rose-50/50 p-3 rounded-2xl">${quant.detailStory}</p>
                 </div>
 
-                <!-- =========================================================
-                     2. 【お買い得メーター】いま高い？安い？がひと目でわかるバー
-                ========================================================== -->
-                <div class="bg-white rounded-3xl p-4 border border-rose-100">
-                    <div class="flex justify-between items-center mb-1.5">
-                        <h4 class="text-xs font-extrabold text-slate-700">🌡️ お買い得メーター（いま高い？安い？）</h4>
-                        <span class="text-[10px] font-bold text-slate-400">左にあるほどお安いよ</span>
-                    </div>
-                    <div class="relative pt-2 pb-1">
-                        <div class="h-3.5 w-full rounded-full gauge-gentle"></div>
-                        <div class="absolute top-0 -ml-2.5 flex flex-col items-center" style="left: ${quant.gaugePosition}%;">
-                            <div class="w-5 h-5 rounded-full bg-white border-4 border-rose-500 shadow-md"></div>
-                        </div>
-                    </div>
-                    <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1">
-                        <span class="text-emerald-600">🛍️ お買い得セール圏</span>
-                        <span>☕ ふだんの平均</span>
-                        <span class="text-rose-500">🔥 人気で高め圏</span>
-                    </div>
+                <!-- 2. 🎓 この商品のしくみ＆学びメモ -->
+                <div class="bg-amber-50/70 rounded-3xl p-3.5 border border-amber-200/80 space-y-1.5 text-[11px] text-slate-700 leading-relaxed">
+                    <div>${getStudyMemo(item)}</div>
+                    <div class="pt-1 border-t border-amber-200/60 text-slate-600">💡 <strong>特徴：</strong>${item.businessSummary}</div>
                 </div>
 
-                <!-- =========================================================
-                     3. 【直近の価格とグラフ】Yahoo!ファイナンス連動ボード
-                ========================================================== -->
-                <div class="rounded-3xl overflow-hidden border border-rose-200 bg-white shadow-xs">
-                    <div class="bg-slate-800 text-white p-3.5">
-                        <div class="flex justify-between items-center text-[10px] text-slate-300 mb-1.5">
-                            <span>📊 現在の価格データ（自動更新）</span>
-                            <a href="${yfUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2.5 py-0.5 rounded-full font-bold">
-                                🔗 Yahoo!ファイナンスで見る ↗
-                            </a>
+                <!-- 3. お買い得メーター ＆ 直近グラフ -->
+                <div class="bg-white rounded-3xl p-4 border border-slate-200/80 space-y-3">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-extrabold text-slate-700">🌡️ お買い得メーター</span>
+                            <span class="text-xs font-extrabold text-slate-800">${formatYen(item.price)} <span class="text-[11px] text-rose-500">(${item.change})</span></span>
                         </div>
-                        <div class="grid ${hasPts ? 'grid-cols-2' : 'grid-cols-1'} gap-2 items-center">
-                            <div class="${hasPts ? 'border-r border-slate-600 pr-2' : ''}">
-                                <span class="text-[10px] text-slate-300 block">${isFundType ? '現在の基準価額' : '現在の株価'}</span>
-                                <div class="flex items-baseline gap-2 mt-0.5 flex-wrap">
-                                    <span class="text-xl font-extrabold text-white">${formatYen(item.price)}</span>
-                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isMainPos ? 'bg-emerald-500/30 text-emerald-200' : 'bg-rose-500/30 text-rose-200'}">${item.change}</span>
-                                </div>
+                        <div class="relative pt-2 pb-1">
+                            <div class="h-3 w-full rounded-full gauge-bar"></div>
+                            <div class="absolute top-0.5 -ml-2.5" style="left: ${quant.gaugePosition}%;">
+                                <div class="w-4 h-4 rounded-full bg-white border-4 border-slate-800 shadow"></div>
                             </div>
-                            ${hasPts ? `
-                            <div class="pl-1">
-                                <span class="text-[10px] text-sky-300 font-bold block">🌙 夜間の取引価格 (PTS)</span>
-                                <div class="text-lg font-extrabold text-white">${formatYen(item.ptsPrice)}</div>
-                                <span class="text-[10px] text-sky-200">昼の終値比 ${item.ptsChange || ''}</span>
-                            </div>` : ''}
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
+                            <span class="text-emerald-600">🛍️ お買い得</span>
+                            <span>☕ ふだんの平均 (${formatYen(item.ma25)})</span>
+                            <span class="text-rose-500">🔥 高め</span>
                         </div>
                     </div>
 
-                    <div class="p-3 bg-white">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-[10px] font-bold text-slate-600">📈 ここ最近の値動きグラフ（緑の線がふだんの平均）</span>
+                    <div class="pt-2 border-t border-slate-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-slate-500">📈 値動きグラフ（緑がふだんの平均線）</span>
                             <div class="flex gap-1">
                                 ${[22, 60, 120].map(d => `<button type="button" onclick="switchChartPeriod(${d}, '${item.id}')" class="px-2 py-0.5 rounded-full ${currentChartPeriod===d?'bg-rose-400 text-white font-extrabold':'bg-slate-100 text-slate-600 font-bold'} text-[10px]">${d===22?'1カ月':d===60?'3カ月':'半年'}</button>`).join("")}
                             </div>
                         </div>
-                        <div id="chartCrosshairInfo" class="text-[10px] font-bold text-slate-600 bg-rose-50/40 px-2.5 py-1 rounded-xl border border-rose-100 flex justify-between mb-1">
-                            <span>グラフを指でなぞるとその日の価格が見られるよ</span>
+                        <div id="chartCrosshairInfo" class="text-[10px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-xl flex justify-between mb-1">
+                            <span>グラフを指でなぞると日付別の価格が出るよ</span>
                         </div>
-                        <div class="w-full h-[175px] relative">
+                        <div class="w-full h-[165px] relative">
                             <canvas id="yfCandlestickCanvas" class="w-full h-full block"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 日経・Yahoo!・みんかぶ・株探へのワンタップ外部リンク -->
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-1.5 text-[10px] font-bold">
+                        <span class="text-slate-400 shrink-0">ニュース・詳細:</span>
+                        <div class="flex gap-1.5 overflow-x-auto custom-scroll">
+                            <a href="${nkUrl}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0">📰 日経で見る ↗</a>
+                            <a href="${yfUrl}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0">📊 Y!ファイナンス ↗</a>
+                            <a href="${mkUrl}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0">🔍 みんかぶ ↗</a>
+                            ${!isFund ? `<a href="${kbUrl}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0">📈 株探 ↗</a>` : ''}
                         </div>
                     </div>
                 </div>
 
-                <!-- =========================================================
-                     4. 【統計データと数字の根拠】なぜAIがそう判断したのかの客観的証拠
-                ========================================================== -->
-                <div class="bg-slate-800 text-white rounded-3xl p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <!-- 4. 🔬 統計データと数字の根拠（裏側のアルゴリズム計算結果） -->
+                <div class="bg-slate-800 text-white rounded-3xl p-4 space-y-2.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-extrabold text-teal-300">🔬 判断の裏付け（統計データと数字の根拠）</span>
+                        <span class="text-[11px] font-extrabold bg-white/10 px-2.5 py-0.5 rounded-full">総合スコア ${quant.totalScore}点</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                        <div class="bg-slate-900/80 p-2.5 rounded-2xl">
+                            <span class="text-[10px] text-slate-400 block">25日平均との差</span>
+                            <strong class="text-sm text-white">${quant.maDiffPct > 0 ? '+' + quant.maDiffPct : quant.maDiffPct}%</strong>
+                        </div>
+                        <div class="bg-slate-900/80 p-2.5 rounded-2xl">
+                            <span class="text-[10px] text-slate-400 block">買われすぎ温度計 (RSI)</span>
+                            <strong class="text-sm text-white">${item.rsi} 度</strong> <span class="text-[9px] text-slate-400">(30以下割安)</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2.5 rounded-2xl">
+                            <span class="text-[10px] text-slate-400 block">統計振れ幅 (ボリンジャー)</span>
+                            <strong class="text-sm text-teal-300">${item.bb > 0 ? '+' + item.bb : item.bb} σ</strong>
+                        </div>
+                        <div class="bg-slate-900/80 p-2.5 rounded-2xl">
+                            <span class="text-[10px] text-slate-400 block">過学習防止 統計信頼度</span>
+                            <strong class="text-sm text-emerald-300">${quant.cpcvConfidence}%</strong>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/80 p-2.5 rounded-2xl grid grid-cols-2 gap-2 text-[11px]">
                         <div>
-                            <span class="text-[10px] font-bold text-teal-300 block">QUANTITATIVE EVIDENCE</span>
-                            <h4 class="text-xs font-extrabold text-white">🔬 判断の裏付けとなる統計データ・数字の根拠</h4>
+                            <span class="text-[10px] text-slate-400 block">① 最初のお試し目安</span>
+                            <strong class="text-white">${formatYen(quant.entry1)}</strong> <span class="text-[10px] text-teal-300">(¥${Math.round(budget * r1).toLocaleString()})</span>
                         </div>
-                        <span class="text-xs font-extrabold bg-teal-500/20 text-teal-300 border border-teal-400/30 px-2.5 py-1 rounded-full">
-                            AI総合スコア ${quant.totalScore}点
-                        </span>
-                    </div>
-
-                    <p class="text-[11px] text-slate-300 leading-relaxed">
-                        上のやさしい提案は、当てずっぽうではなく以下の<strong>4つの統計データと数学アルゴリズム</strong>を計算して導き出しています。
-                    </p>
-
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-700">
-                            <span class="text-[10px] text-slate-400 block">① 25日移動平均線との差</span>
-                            <strong class="text-sm font-extrabold ${parseFloat(quant.maDiffPct) <= 0 ? 'text-emerald-400' : 'text-amber-300'}">
-                                ${quant.maDiffPct > 0 ? '+' + quant.maDiffPct : quant.maDiffPct}%
-                            </strong>
-                            <span class="text-[10px] text-slate-400 block mt-0.5">25日平均: ${formatYen(item.ma25)}</span>
-                        </div>
-                        <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-700">
-                            <span class="text-[10px] text-slate-400 block">② 買われすぎ指数 (14日RSI)</span>
-                            <strong class="text-sm font-extrabold ${item.rsi <= 40 ? 'text-emerald-400' : item.rsi >= 65 ? 'text-rose-400' : 'text-sky-300'}">
-                                ${item.rsi} 度
-                            </strong>
-                            <span class="text-[10px] text-slate-400 block mt-0.5">30以下で割安 / 70以上で過熱</span>
-                        </div>
-                        <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-700">
-                            <span class="text-[10px] text-slate-400 block">③ ボリンジャーバンド位置</span>
-                            <strong class="text-sm font-extrabold text-purple-300">
-                                ${item.bb > 0 ? '+' + item.bb : item.bb} σ (シグマ)
-                            </strong>
-                            <span class="text-[10px] text-slate-400 block mt-0.5">統計的な振れ幅の位置</span>
-                        </div>
-                        <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-700">
-                            <span class="text-[10px] text-slate-400 block">④ 過学習防止 統計信頼度</span>
-                            <strong class="text-sm font-extrabold text-teal-300">
-                                ${quant.cpcvConfidence}%
-                            </strong>
-                            <span class="text-[10px] text-slate-400 block mt-0.5">CPCV交差検証クリア</span>
-                        </div>
-                    </div>
-
-                    <!-- 統計から弾き出した具体的な目安価格と予算配分 -->
-                    <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-700 space-y-2">
-                        <div class="text-[11px] font-extrabold text-teal-300">🎯 統計データから計算した目安価格とお財布配分</div>
-                        <div class="grid grid-cols-2 gap-2 text-[11px]">
-                            <div>
-                                <span class="text-slate-400 block">① 最初のお試し価格目安</span>
-                                <strong class="text-white">${formatYen(quant.entry1)}</strong>
-                                <span class="text-teal-300 text-[10px] block">予算配分: ¥${Math.round(budget * r1).toLocaleString()}</span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block">② 安くなったら買う価格目安</span>
-                                <strong class="text-sky-300">${formatYen(quant.entry2)}</strong>
-                                <span class="text-sky-300 text-[10px] block">予算配分: ¥${Math.round(budget * r2).toLocaleString()}</span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block">🎉 ご褒美（利益確定）目標</span>
-                                <strong class="text-emerald-400">${formatYen(quant.takeProfit)}</strong>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block">🛡️ お休み（損切り）目安</span>
-                                <strong class="text-rose-400">${formatYen(quant.stopLoss)}</strong>
-                            </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block">② 安い日の追加目安</span>
+                            <strong class="text-sky-300">${formatYen(quant.entry2)}</strong> <span class="text-[10px] text-sky-300">(¥${Math.round(budget * r2).toLocaleString()})</span>
                         </div>
                     </div>
                 </div>
             `;
 
             setTimeout(() => {
-                drawGentleChart("yfCandlestickCanvas", item, currentChartPeriod, null);
+                drawCleanChart("yfCandlestickCanvas", item, currentChartPeriod, null);
                 bindChartTouchEvents("yfCandlestickCanvas", item);
             }, 30);
         }
@@ -1194,7 +1230,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             document.getElementById("detailModal").classList.add("hidden");
         }
 
-        // 検索・オンライン候補取得
+        // 検索・5重オンライン候補取得
         let liveSearchTimer = null;
 
         function renderSearchCandidates(showDefaultWhenEmpty = false) {
@@ -1221,7 +1257,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 ? MASTER_MARKET_DB.slice(0, 14)
                 : MASTER_MARKET_DB.filter(item => normalizeText(item.keywords).includes(q));
 
-            titleEl.innerText = !q ? "🌸 人気の会社・投資信託（タップすると見られるよ）" : `「${rawQuery}」の候補`;
+            titleEl.innerText = !q ? "🌸 人気の金融商品（タップすると追加して学べるよ）" : `「${rawQuery}」の候補`;
             listEl.innerHTML = "";
             const macro = document.getElementById("macroSelect").value;
 
@@ -1233,7 +1269,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 codeRow.innerHTML = `
                     <div>
                         <span class="text-[9px] font-extrabold bg-rose-400 text-white px-2 py-0.5 rounded-full">コード直接追加</span>
-                        <strong class="text-xs text-rose-900 ml-1">番号「${cleanCode}」のデータを取って追加する</strong>
+                        <strong class="text-xs text-rose-900 ml-1">番号「${cleanCode}」を自動取得して追加</strong>
                     </div>
                     <span class="text-xs font-extrabold bg-rose-500 text-white px-3 py-1 rounded-full shrink-0">＋ 追加</span>
                 `;
@@ -1245,7 +1281,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 const alreadyIn = watchlist.some(w => w.id === item.id);
                 const typeBadge = getAssetTypeBadge(item.assetClass);
                 const row = document.createElement("div");
-                row.className = "p-3 bg-white hover:bg-rose-50/50 flex justify-between items-center gap-2 cursor-pointer";
+                row.className = "p-3 bg-white hover:bg-rose-50/40 flex justify-between items-center gap-2 cursor-pointer";
                 row.onclick = () => selectAndFetchLive(item);
                 row.innerHTML = `
                     <div class="min-w-0 flex-1">
@@ -1253,12 +1289,13 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                             <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${typeBadge.cls} shrink-0">${typeBadge.label}</span>
                             <span class="text-xs font-extrabold text-slate-800 truncate">${item.name}</span>
                         </div>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-[10px] font-bold text-rose-600">${quant.badgeText}</span>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] text-slate-400">${item.sector}</span>
+                            <span class="text-[10px] font-bold text-rose-500">${quant.badgeText}</span>
                         </div>
                     </div>
-                    <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-full shrink-0 ${alreadyIn ? 'bg-slate-100 text-slate-600' : 'bg-rose-400 text-white shadow-xs'}">
-                        ${alreadyIn ? '見る' : '＋ 追加'}
+                    <button type="button" class="text-[11px] font-extrabold px-3 py-1 rounded-full shrink-0 ${alreadyIn ? 'bg-slate-100 text-slate-600' : 'bg-rose-400 text-white'}">
+                        ${alreadyIn ? '開く' : '＋ 追加'}
                     </button>
                 `;
                 listEl.appendChild(row);
@@ -1268,10 +1305,10 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 const safeQ = rawQuery.replace(/['"<>&]/g, "");
                 const directBox = document.createElement("div");
                 directBox.id = "directFetchActionRow";
-                directBox.className = "p-3 bg-rose-50/60 text-center";
+                directBox.className = "p-2.5 bg-rose-50/50 text-center";
                 directBox.innerHTML = `
-                    <button type="button" onclick="directFetchByQueryOrCode('${safeQ}')" class="w-full py-2.5 px-3 rounded-2xl bg-rose-400 hover:bg-rose-500 text-white text-xs font-extrabold shadow-xs">
-                        🔍 「${safeQ}」をネットから直接さがして追加する
+                    <button type="button" onclick="directFetchByQueryOrCode('${safeQ}')" class="w-full py-2 px-3 rounded-2xl bg-rose-400 text-white text-xs font-extrabold">
+                        🔍 「${safeQ}」を日経・Y!・みんかぶから直接取得して追加
                     </button>
                 `;
                 listEl.appendChild(directBox);
@@ -1282,7 +1319,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             if (rawQuery.length >= 1) {
                 clearTimeout(liveSearchTimer);
                 liveStatus.classList.remove("hidden");
-                document.getElementById("liveSearchStatusText").innerText = `🌐 「${rawQuery}」を全国の株・投資信託から検索中...`;
+                document.getElementById("liveSearchStatusText").innerText = `🌐 日経・Yahoo!・みんかぶから「${rawQuery}」を検索中...`;
 
                 liveSearchTimer = setTimeout(async () => {
                     const onlineHits = await searchMultiSourceOnline(rawQuery);
@@ -1291,25 +1328,24 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
 
                     onlineHits.forEach(hit => {
                         if (localMatches.some(m => m.id.toUpperCase() === hit.id.toUpperCase())) return;
-                        const isF = hit.assetClass === "FUND";
                         const row = document.createElement("div");
-                        row.className = "p-3 bg-sky-50/40 hover:bg-sky-50 flex justify-between items-center gap-2 cursor-pointer";
+                        row.className = "p-3 bg-sky-50/30 hover:bg-sky-50 flex justify-between items-center gap-2 cursor-pointer";
                         row.onclick = () => selectOnlineCandidate(hit.id, hit.name, hit.assetClass);
                         row.innerHTML = `
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5">
-                                    <span class="text-[9px] font-bold ${isF ? 'bg-teal-100 text-teal-800' : 'bg-sky-100 text-sky-800'} px-2 py-0.5 rounded-full shrink-0">${isF ? '🌱 投資信託' : '🏢 会社の株'}</span>
+                                    <span class="text-[9px] font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full shrink-0">${hit.sourceTag}</span>
                                     <span class="text-xs font-extrabold text-slate-800 truncate">${hit.name}</span>
                                 </div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">コード: ${hit.id} ・タップすると自動取得して追加するよ</div>
+                                <div class="text-[10px] text-slate-400 mt-0.5">コード: ${hit.id} ・タップで自動取得して追加</div>
                             </div>
-                            <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-full shrink-0 bg-sky-500 text-white">＋ 追加</button>
+                            <button type="button" class="text-[11px] font-extrabold px-3 py-1 rounded-full shrink-0 bg-sky-500 text-white">＋ 追加</button>
                         `;
                         if (directBox && directBox.parentNode === listEl) listEl.insertBefore(row, directBox);
                         else listEl.appendChild(row);
                     });
 
-                    document.getElementById("liveSearchStatusText").innerText = `✨ 気になる候補をタップするとリストに追加できるよ`;
+                    document.getElementById("liveSearchStatusText").innerText = `✨ 候補をタップするとリストに追加して詳しく学べるよ`;
                 }, 260);
             }
         }
@@ -1355,7 +1391,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             if (masterHit) { await selectAndFetchLive(masterHit); return; }
 
             const isFund = assetClass === "FUND" || isFundCodeFormat(cleanCode);
-            const newItem = parseMasterLine(`${cleanCode}|${assetName}|${isFund ? "FUND" : "STOCK"}|${isFund ? "投資信託" : "上場企業"}|${isFund ? 25000 : 1800}|${isFund ? 24600 : 1770}|50|0.0|取得中...||||${cleanCode}|市場データから統計アルゴリズムで自動解析しているよ。`);
+            const newItem = parseMasterLine(`${cleanCode}|${assetName}|${isFund ? "FUND" : assetClass}|${isFund ? "投資信託" : "上場銘柄"}|${isFund ? 25000 : 1800}|${isFund ? 24600 : 1770}|50|0.0|取得中...||||${cleanCode}|日経・Yahoo!・みんかぶのデータから統計アルゴリズムで解析しているよ。`);
 
             const existingIdx = watchlist.findIndex(w => w.id === cleanCode);
             if (existingIdx >= 0) watchlist[existingIdx] = newItem;
@@ -1386,12 +1422,23 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             document.getElementById("searchResultPanel").classList.add("hidden");
         }
 
-        // メイン画面・カード一覧の描画（一覧画面もやさしい言葉を中心に表示）
+        // スッキリ整理された一覧画面・バッジ描画
         function getAssetTypeBadge(type) {
-            if (type === "STOCK") return { label: "🏢 会社の株", cls: "bg-sky-50 text-sky-700 border border-sky-200" };
-            if (type === "REIT") return { label: "🏙️ 不動産", cls: "bg-amber-50 text-amber-800 border border-amber-200" };
-            if (type === "LEVERAGE") return { label: "⚡ 4.3倍ブル", cls: "bg-purple-50 text-purple-700 border border-purple-200" };
+            if (type === "STOCK") return { label: "🏢 株", cls: "bg-sky-50 text-sky-700 border border-sky-200" };
+            if (type === "ETF") return { label: "📊 ETF", cls: "bg-indigo-50 text-indigo-700 border border-indigo-200" };
+            if (type === "GOLD") return { label: "👑 ゴールド", cls: "bg-amber-50 text-amber-800 border border-amber-200" };
+            if (type === "BOND") return { label: "🛡️ 債券・バランス", cls: "bg-blue-50 text-blue-700 border border-blue-200" };
+            if (type === "REIT") return { label: "🏙️ 不動産REIT", cls: "bg-orange-50 text-orange-800 border border-orange-200" };
+            if (type === "LEVERAGE") return { label: "⚡ ブル型", cls: "bg-purple-50 text-purple-700 border border-purple-200" };
             return { label: "🌱 投資信託", cls: "bg-teal-50 text-teal-700 border border-teal-200" };
+        }
+
+        function toggleWalletBox() {
+            const box = document.getElementById("walletDetailBox");
+            const arrow = document.getElementById("walletToggleArrow");
+            const isHidden = box.classList.contains("hidden");
+            box.classList.toggle("hidden", !isHidden);
+            arrow.innerText = isHidden ? "▲ 閉じる" : "▼ 開く";
         }
 
         function updateAllCalculations() {
@@ -1403,32 +1450,25 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
         function renderGlobalAllocation() {
             const budget = parseFloat(document.getElementById("budgetInput").value) || 100000;
             const macro = document.getElementById("macroSelect").value;
+            document.getElementById("walletSummaryLabel").innerText = `予算 ¥${budget.toLocaleString()}`;
+
             let r1 = 0.35, r2 = 0.40, r3 = 0.25;
             if (macro === "shock") { r1 = 0.50; r2 = 0.35; r3 = 0.15; }
             else if (macro === "overheat") { r1 = 0.15; r2 = 0.30; r3 = 0.55; }
 
             document.getElementById("globalAllocationCards").innerHTML = `
-                <div class="bg-rose-50/80 border border-rose-200 rounded-2xl p-2.5">
-                    <span class="text-[10px] font-bold text-rose-700 block">① まず少し買う</span>
-                    <strong class="text-xs font-extrabold text-rose-900">¥${Math.round(budget * r1).toLocaleString()}</strong>
-                </div>
-                <div class="bg-teal-50/80 border border-teal-200 rounded-2xl p-2.5">
-                    <span class="text-[10px] font-bold text-teal-800 block">② 安い日に追加</span>
-                    <strong class="text-xs font-extrabold text-teal-900">¥${Math.round(budget * r2).toLocaleString()}</strong>
-                </div>
-                <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-2.5">
-                    <span class="text-[10px] font-bold text-amber-800 block">③ お守りの残し</span>
-                    <strong class="text-xs font-extrabold text-amber-900">¥${Math.round(budget * r3).toLocaleString()}</strong>
-                </div>
+                <div class="bg-rose-50/70 border border-rose-200 rounded-xl p-2"><span class="text-[10px] font-bold text-rose-700 block">① まず少し</span><strong class="text-xs font-extrabold text-rose-900">¥${Math.round(budget * r1).toLocaleString()}</strong></div>
+                <div class="bg-teal-50/70 border border-teal-200 rounded-xl p-2"><span class="text-[10px] font-bold text-teal-800 block">② 安い日に</span><strong class="text-xs font-extrabold text-teal-900">¥${Math.round(budget * r2).toLocaleString()}</strong></div>
+                <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-2"><span class="text-[10px] font-bold text-amber-800 block">③ お守り</span><strong class="text-xs font-extrabold text-amber-900">¥${Math.round(budget * r3).toLocaleString()}</strong></div>
             `;
         }
 
         function setFilter(filterType) {
             currentFilter = filterType;
-            ["ALL", "FUND", "STOCK", "REIT"].forEach(f => {
+            ["ALL", "FUND", "STOCK", "SAFE"].forEach(f => {
                 document.getElementById(`filter-${f}`).className = f === filterType
-                    ? "text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-rose-400 text-white shrink-0 shadow-xs"
-                    : "text-[11px] font-bold px-3 py-1.5 rounded-2xl bg-white text-slate-600 border border-rose-100 shrink-0";
+                    ? "text-[11px] font-bold px-3 py-1.5 rounded-full bg-rose-400 text-white shrink-0"
+                    : "text-[11px] font-bold px-3 py-1.5 rounded-full bg-white text-slate-600 border border-slate-200 shrink-0";
             });
             renderWatchlist();
         }
@@ -1441,55 +1481,49 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
 
             let filtered = watchlist.filter(item => {
                 if (currentFilter === "ALL") return true;
-                if (currentFilter === "FUND") return item.assetClass === "FUND" || item.assetClass === "LEVERAGE";
+                if (currentFilter === "FUND") return item.assetClass === "FUND" || item.assetClass === "ETF" || item.assetClass === "LEVERAGE";
+                if (currentFilter === "SAFE") return item.assetClass === "GOLD" || item.assetClass === "BOND" || item.assetClass === "REIT";
                 return item.assetClass === currentFilter;
             });
 
             if (sortMode === "score_desc") filtered.sort((a, b) => evaluateQuantMetrics(b, macro).totalScore - evaluateQuantMetrics(a, macro).totalScore);
             else if (sortMode === "rsi_asc") filtered.sort((a, b) => a.rsi - b.rsi);
 
-            document.getElementById("watchlistCounter").innerText = `${filtered.length} 個を見守り中`;
+            document.getElementById("watchlistCounter").innerText = `${filtered.length} 件`;
 
             filtered.forEach(item => {
                 const quant = evaluateQuantMetrics(item, macro);
                 const typeBadge = getAssetTypeBadge(item.assetClass);
 
                 const card = document.createElement("div");
-                card.className = "soft-card rounded-3xl p-4 cursor-pointer hover:border-rose-300";
+                card.className = "clean-card rounded-3xl p-3.5 cursor-pointer hover:border-rose-200";
                 card.onclick = () => openDetailModal(item.id);
                 card.innerHTML = `
-                    <div class="flex justify-between items-start gap-2 mb-2">
+                    <div class="flex justify-between items-center gap-2 mb-2">
                         <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${typeBadge.cls}">${typeBadge.label}</span>
-                                <span class="text-[10px] font-bold text-slate-400">${item.sector || ''}</span>
+                            <div class="flex items-center gap-1.5 mb-0.5">
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${typeBadge.cls}">${typeBadge.label}</span>
+                                <span class="text-[10px] font-bold text-slate-400 truncate">${item.sector || ''}</span>
                             </div>
-                            <h3 class="text-sm font-extrabold text-slate-800 leading-snug">${item.name}</h3>
+                            <h3 class="text-sm font-extrabold text-slate-800 truncate">${item.name}</h3>
                         </div>
                         <div class="text-right shrink-0">
-                            <span class="text-[9px] text-slate-400 block">いまの価格</span>
                             <div class="text-sm font-extrabold text-slate-800">${formatYen(item.price)}</div>
+                            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${quant.badgeStyle} mt-0.5">
+                                ${quant.badgeText}
+                            </span>
                         </div>
                     </div>
-
-                    <!-- 数字を使わないやさしい提案バッジ -->
-                    <div class="bg-rose-50/40 rounded-2xl px-3 py-2 border border-rose-100 mb-2">
-                        <span class="inline-block text-xs font-extrabold px-2.5 py-0.5 rounded-full border ${quant.badgeStyle} mb-1">
-                            ${quant.badgeText}
-                        </span>
-                        <p class="text-[11px] text-slate-700 font-medium leading-relaxed">
-                            💬 ${quant.gentleAdvice}
-                        </p>
-                    </div>
-
-                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold pt-1">
-                        <span>🔬 統計信頼度・チャート計算済</span>
-                        <span class="text-rose-500 font-extrabold">くわしい理由と統計データを見る ＞</span>
-                    </div>
+                    <p class="text-[11px] text-slate-600 font-medium bg-slate-50/80 px-3 py-1.5 rounded-2xl truncate">
+                        💬 ${quant.gentleAdvice}
+                    </p>
                 `;
                 container.appendChild(card);
             });
         }
+
+        function openLearnGuideModal() { document.getElementById("learnGuideModal").classList.remove("hidden"); }
+        function closeLearnGuideModal() { document.getElementById("learnGuideModal").classList.add("hidden"); }
 
         function openCatalogModal() {
             document.getElementById("catalogSearchInput").value = "";
@@ -1500,9 +1534,9 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
 
         function setCatalogCat(cat) {
             currentCatalogCat = cat;
-            ["ALL", "投信", "優待", "銀行", "半導体", "高配当"].forEach(c => {
+            ["ALL", "投信", "ゴールド", "ETF", "優待", "銀行", "半導体"].forEach(c => {
                 const btn = document.getElementById(`cat-${c}`);
-                if (btn) btn.className = c === cat ? "text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-400 text-white shrink-0" : "text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-rose-200 text-slate-700 shrink-0";
+                if (btn) btn.className = c === cat ? "text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-400 text-white shrink-0" : "text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border text-slate-600 shrink-0";
             });
             renderCatalogList();
         }
@@ -1521,18 +1555,22 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
 
             items.forEach(item => {
                 const quant = evaluateQuantMetrics(item, macro);
+                const typeBadge = getAssetTypeBadge(item.assetClass);
                 const row = document.createElement("div");
                 row.className = "py-2.5 px-2 flex justify-between items-center gap-2 hover:bg-rose-50/40 rounded-2xl cursor-pointer";
                 row.onclick = () => selectAndFetchLive(item);
                 row.innerHTML = `
                     <div class="min-w-0 flex-1">
-                        <span class="text-xs font-extrabold text-slate-800 block truncate">${item.name}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${typeBadge.cls} shrink-0">${typeBadge.label}</span>
+                            <span class="text-xs font-extrabold text-slate-800 truncate">${item.name}</span>
+                        </div>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-[10px] font-bold text-slate-400">${item.sector}</span>
-                            <span class="text-[10px] font-bold text-rose-600">${quant.badgeText}</span>
+                            <span class="text-[10px] text-slate-400">${item.sector}</span>
+                            <span class="text-[10px] font-bold text-rose-500">${quant.badgeText}</span>
                         </div>
                     </div>
-                    <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-full shrink-0 bg-rose-400 text-white">＋ 追加</button>
+                    <button type="button" class="text-[11px] font-extrabold px-3 py-1 rounded-full shrink-0 bg-rose-400 text-white">＋ 追加</button>
                 `;
                 container.appendChild(row);
             });
@@ -1550,7 +1588,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             if (!name && !code) { alert("コードまたは名前を入力してね！"); return; }
             if (code && (isStockCodeFormat(code) || isFundCodeFormat(code))) {
                 const isF = isFundCodeFormat(code) || type === "FUND" || type === "LEVERAGE";
-                await selectOnlineCandidate(code, name || (isF ? `投資信託 (${code})` : `上場銘柄 (${code})`), isF ? "FUND" : "STOCK");
+                await selectOnlineCandidate(code, name || (isF ? `投資信託 (${code})` : `上場銘柄 (${code})`), type);
                 return;
             }
             if (isNaN(price) || price <= 0) {
@@ -1559,7 +1597,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
                 return;
             }
             const id = code || ("custom-" + Date.now());
-            const newItem = parseMasterLine(`${id}|${name || id}|${type}|手動追加アイテム|${price}|${Math.round(price * 0.985)}|50|0.0|0.00%||||${name}|追加された銘柄を統計データで見守り中だよ。`);
+            const newItem = parseMasterLine(`${id}|${name || id}|${type}|カスタム追加商品|${price}|${Math.round(price * 0.985)}|50|0.0|0.00%||||${name}|追加された金融商品を統計データで見守り中だよ。`);
             watchlist.unshift(newItem);
             closeCustomModal();
             saveState();
@@ -1572,7 +1610,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|低コス�
             renderWatchlist();
         }
 
-        // アプリ起動＆最新データ自動同期
+        // 起動初期化
         loadState();
         ["focus", "input", "keyup", "compositionend", "change", "search"].forEach(ev => {
             document.getElementById("quickSearchInput").addEventListener(ev, () => renderSearchCandidates(true));
